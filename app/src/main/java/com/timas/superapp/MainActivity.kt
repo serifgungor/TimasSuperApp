@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.CircleShape
 import com.timas.superapp.components.SuperAppToolbar
 import com.timas.superapp.components.SuperAppBottomNav
+import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
 class MainActivity : ComponentActivity() {
@@ -37,11 +38,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TimasTheme {
-                var searchQuery by remember { mutableStateOf("") }
-                var selectedBottomTab by remember { mutableStateOf(0) }
-                val focusManager = LocalFocusManager.current
+                var showSplash by remember { mutableStateOf(true) }
+                
+                if (showSplash) {
+                    SplashScreen(onSplashFinished = { showSplash = false })
+                } else {
+                    var searchQuery by remember { mutableStateOf("") }
+                    var selectedBottomTab by remember { mutableStateOf(0) }
+                    val focusManager = LocalFocusManager.current
 
-                Scaffold(
+                    Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
                         .pointerInput(Unit) {
@@ -61,14 +67,15 @@ class MainActivity : ComponentActivity() {
                             onTabSelected = { selectedBottomTab = it }
                         )
                     }
-                ) { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Greeting(name = "Super App'e Hoş Geldiniz")
+                    ) { innerPadding ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Greeting(name = "Super App'e Hoş Geldiniz")
+                        }
                     }
                 }
             }
