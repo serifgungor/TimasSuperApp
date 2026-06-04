@@ -20,7 +20,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.FabPosition
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.CircleShape
 import com.timas.superapp.components.SuperAppToolbar
+import com.timas.superapp.components.SuperAppBottomNav
 import com.timas.superapp.ui.theme.TimasTheme
 
 class MainActivity : ComponentActivity() {
@@ -45,6 +53,9 @@ class MainActivity : ComponentActivity() {
                             searchQuery = searchQuery,
                             onSearchQueryChange = { searchQuery = it }
                         )
+                    },
+                    bottomBar = {
+                        SuperAppBottomNav()
                     }
                 ) { innerPadding ->
                     Box(
