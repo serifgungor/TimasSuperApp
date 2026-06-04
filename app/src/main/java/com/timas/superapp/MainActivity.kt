@@ -16,6 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.timas.superapp.components.SuperAppToolbar
 import com.timas.superapp.ui.theme.TimasTheme
@@ -27,9 +30,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             TimasTheme {
                 var searchQuery by remember { mutableStateOf("") }
+                val focusManager = LocalFocusManager.current
 
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = {
+                                focusManager.clearFocus()
+                            })
+                        },
                     topBar = {
                         SuperAppToolbar(
                             searchQuery = searchQuery,

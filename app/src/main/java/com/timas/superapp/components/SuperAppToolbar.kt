@@ -1,8 +1,14 @@
 package com.timas.superapp.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,32 +86,42 @@ fun SuperAppToolbar(
                     modifier = Modifier.height(40.dp)
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
                 // Center: Search Bar (Animated)
                 var isSearchActive by remember { mutableStateOf(searchQuery.isNotEmpty()) }
-                val searchModifier = if (isSearchActive) Modifier.weight(1f) else Modifier.width(40.dp)
+                val searchModifier = if (isSearchActive) Modifier.weight(1f) else Modifier.wrapContentWidth()
+                val focusRequester = remember { FocusRequester() }
+
+                LaunchedEffect(isSearchActive) {
+                    if (isSearchActive) {
+                        focusRequester.requestFocus()
+                    }
+                }
 
                 Box(
                     modifier = searchModifier
-                        .fillMaxHeight(0.65f)
+                        .fillMaxHeight(0.75f)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { isSearchActive = true }
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { isSearchActive = true }
                         .animateContentSize()
-                        .padding(horizontal = if (isSearchActive) 12.dp else 0.dp),
-                    contentAlignment = if (isSearchActive) Alignment.CenterStart else Alignment.Center
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = if (isSearchActive) Arrangement.Start else Arrangement.Center
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                         
                         if (isSearchActive) {
@@ -113,18 +129,25 @@ fun SuperAppToolbar(
                             BasicTextField(
                                 value = searchQuery,
                                 onValueChange = onSearchQueryChange,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(focusRequester)
+                                    .onFocusChanged {
+                                        if (!it.isFocused) {
+                                            isSearchActive = false
+                                        }
+                                    },
                                 singleLine = true,
                                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    fontWeight = FontWeight.Normal
+                                    fontWeight = FontWeight.Light
                                 ),
                                 decorationBox = { innerTextField ->
                                     if (searchQuery.isEmpty()) {
                                         Text(
                                             text = "Ara...",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Normal,
+                                            fontWeight = FontWeight.Light,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
@@ -140,12 +163,23 @@ fun SuperAppToolbar(
                                     modifier = Modifier
                                         .size(20.dp)
                                         .clip(CircleShape)
-                                        .clickable {
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) {
                                             onSearchQueryChange("")
                                             isSearchActive = false
                                         }
                                 )
                             }
+                        } else {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Arama",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Light,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
