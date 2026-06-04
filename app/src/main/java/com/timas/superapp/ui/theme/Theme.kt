@@ -35,9 +35,9 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun TimasTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, // Şimdilik sadece Light Mode
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Renklerin tam olarak bizim tasarladığımız gibi görünmesi için dinamik renk kapatıldı
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
