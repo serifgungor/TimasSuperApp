@@ -30,11 +30,22 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -197,17 +208,115 @@ fun SuperAppToolbar(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = onNotificationClick,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                Box {
+                    var isNotificationExpanded by remember { mutableStateOf(false) }
+                    
+                    IconButton(
+                        onClick = { isNotificationExpanded = !isNotificationExpanded },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notifications",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    if (isNotificationExpanded) {
+                        val configuration = LocalConfiguration.current
+                        val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                        val popupWidthFraction = if (isPortrait) 1f else 0.5f
+                        val popupHeightFraction = if (isPortrait) 0.8f else 0.95f
+                        
+                        Popup(
+                            onDismissRequest = { isNotificationExpanded = false },
+                            properties = PopupProperties(focusable = true)
+                        ) {
+                            // Invisible full-screen background to catch all outside clicks
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) { isNotificationExpanded = false }
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 60.dp), // Push below toolbar
+                                    contentAlignment = Alignment.TopEnd
+                                ) {
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth(popupWidthFraction)
+                                            .fillMaxHeight(popupHeightFraction) // Max height 80% or 95% of screen
+                                            .padding(if (isPortrait) 0.dp else 16.dp)
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) { /* Prevent clicks on the card from closing it */ },
+                                        shape = if (isPortrait) RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp) else RoundedCornerShape(16.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                                ) {
+                                    // Notification Header
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Bildirimler",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        IconButton(onClick = { isNotificationExpanded = false }, modifier = Modifier.size(24.dp)) {
+                                            Icon(Icons.Default.Close, contentDescription = "Kapat")
+                                        }
+                                    }
+                                    
+                                    // Notification List
+                                    val dummyNotifications = List(15) { index -> 
+                                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Bu sizin ${index + 1}. bildiriminizdir."
+                                    }
+                                    
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        items(dummyNotifications) { notificationText ->
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable { /* Handle click */ }
+                                                    .padding(16.dp),
+                                                verticalAlignment = Alignment.Top
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Info,
+                                                    contentDescription = "Info",
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = notificationText,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
                 }
-                
+            }
+                } // closing Box
+
                 IconButton(
                     onClick = onProfileClick,
                     modifier = Modifier.size(40.dp)
