@@ -115,7 +115,7 @@ fun SuperAppToolbar(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxHeight(),
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Icon(
