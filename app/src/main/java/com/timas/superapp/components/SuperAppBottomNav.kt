@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -48,8 +49,8 @@ class CurvedBottomNavShape : Shape {
         val path = Path().apply {
             val width = size.width
             val height = size.height
-            val curveRadius = density.run { 32.dp.toPx() } // Radius for the cutout
-            val dropDepth = density.run { 24.dp.toPx() }   // Depth of the cutout
+            val curveRadius = density.run { 36.dp.toPx() } // Radius for the cutout
+            val dropDepth = density.run { 36.dp.toPx() }   // Depth of the cutout
             
             moveTo(0f, 0f)
             lineTo(width / 2 - curveRadius * 1.5f, 0f)
@@ -77,6 +78,8 @@ class CurvedBottomNavShape : Shape {
 
 @Composable
 fun SuperAppBottomNav(
+    selectedIndex: Int = 0,
+    onTabSelected: (Int) -> Unit = {},
     onHomeClick: () -> Unit = {},
     onSearchClick: () -> Unit = {},
     onCartClick: () -> Unit = {},
@@ -91,9 +94,7 @@ fun SuperAppBottomNav(
     ) {
         // We use a Surface with a custom shape to create the cutout look
         androidx.compose.material3.Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp), // Pushed down 32dp. FAB will overlap by 24dp
+            modifier = Modifier.fillMaxWidth(),
             color = bottomNavColor,
             shape = CurvedBottomNavShape(),
             shadowElevation = 8.dp
@@ -102,7 +103,7 @@ fun SuperAppBottomNav(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .height(64.dp)
                         .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -115,14 +116,14 @@ fun SuperAppBottomNav(
                         BottomNavItem(
                             icon = Icons.Default.Home,
                             label = "Anasayfa",
-                            contentColor = contentColor,
-                            onClick = onHomeClick
+                            isSelected = selectedIndex == 0,
+                            onClick = { onTabSelected(0); onHomeClick() }
                         )
                         BottomNavItem(
                             icon = Icons.Default.Search,
                             label = "Arama",
-                            contentColor = contentColor,
-                            onClick = onSearchClick
+                            isSelected = selectedIndex == 1,
+                            onClick = { onTabSelected(1); onSearchClick() }
                         )
                     }
                     
@@ -137,14 +138,14 @@ fun SuperAppBottomNav(
                         BottomNavItem(
                             icon = Icons.Default.ShoppingCart,
                             label = "Sepetim",
-                            contentColor = contentColor,
-                            onClick = onCartClick
+                            isSelected = selectedIndex == 2,
+                            onClick = { onTabSelected(2); onCartClick() }
                         )
                         BottomNavItem(
                             icon = Icons.Default.Menu,
                             label = "Menü",
-                            contentColor = contentColor,
-                            onClick = onMenuClick
+                            isSelected = selectedIndex == 3,
+                            onClick = { onTabSelected(3); onMenuClick() }
                         )
                     }
                 }
@@ -160,7 +161,7 @@ fun SuperAppBottomNav(
             shape = CircleShape,
             containerColor = Color(0xFFF26122), // Orange color
             contentColor = Color.White,
-            modifier = Modifier.padding(top = 0.dp) // Starts exactly at the top of the Box
+            modifier = Modifier.offset(y = (-40).dp)
         ) {
             Icon(
                 imageVector = Icons.Default.QrCodeScanner,
@@ -175,27 +176,19 @@ fun SuperAppBottomNav(
 fun BottomNavItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
-    contentColor: Color,
+    isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    IconButton(onClick = onClick) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                color = contentColor,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
+    val contentColor = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f)
+    
+    IconButton(
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = contentColor,
+            modifier = Modifier.size(32.dp) // Increased size
+        )
     }
 }

@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TimasTheme {
                 var searchQuery by remember { mutableStateOf("") }
+                var selectedBottomTab by remember { mutableStateOf(0) }
                 val focusManager = LocalFocusManager.current
 
                 Scaffold(
@@ -55,7 +56,10 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                     bottomBar = {
-                        SuperAppBottomNav()
+                        SuperAppBottomNav(
+                            selectedIndex = selectedBottomTab,
+                            onTabSelected = { selectedBottomTab = it }
+                        )
                     }
                 ) { innerPadding ->
                     Box(
