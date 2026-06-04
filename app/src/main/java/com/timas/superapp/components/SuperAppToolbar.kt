@@ -126,6 +126,8 @@ fun SuperAppToolbar(
                         )
                         
                         if (isSearchActive) {
+                            var hasFocus by remember { mutableStateOf(false) }
+
                             Spacer(modifier = Modifier.width(8.dp))
                             BasicTextField(
                                 value = searchQuery,
@@ -134,8 +136,11 @@ fun SuperAppToolbar(
                                     .weight(1f)
                                     .focusRequester(focusRequester)
                                     .onFocusChanged {
-                                        if (!it.isFocused) {
+                                        if (it.isFocused) {
+                                            hasFocus = true
+                                        } else if (hasFocus) {
                                             isSearchActive = false
+                                            hasFocus = false
                                         }
                                     },
                                 singleLine = true,
