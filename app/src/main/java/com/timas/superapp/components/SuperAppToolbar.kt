@@ -61,7 +61,7 @@ fun SuperAppToolbar(
     onProfileClick: () -> Unit = {}
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(bottom = 5.dp),
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 4.dp
     ) {
@@ -110,7 +110,7 @@ fun SuperAppToolbar(
                             indication = null
                         ) { isSearchActive = true }
                         .animateContentSize()
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 12.dp, vertical = 2.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Row(
