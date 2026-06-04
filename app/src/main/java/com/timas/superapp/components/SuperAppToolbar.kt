@@ -1,5 +1,6 @@
 package com.timas.superapp.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,67 +67,86 @@ fun SuperAppToolbar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Left: Logo
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Super App Logo",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .height(40.dp)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Center: Search Bar (Functional)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(0.65f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.CenterStart
+            // Left Side: Logo + Expandable Search Bar
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxSize()
+                // Logo
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Super App Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.height(40.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Center: Search Bar (Animated)
+                var isSearchActive by remember { mutableStateOf(searchQuery.isNotEmpty()) }
+                val searchModifier = if (isSearchActive) Modifier.weight(1f) else Modifier.width(40.dp)
+
+                Box(
+                    modifier = searchModifier
+                        .fillMaxHeight(0.65f)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { isSearchActive = true }
+                        .animateContentSize()
+                        .padding(horizontal = if (isSearchActive) 12.dp else 0.dp),
+                    contentAlignment = if (isSearchActive) Alignment.CenterStart else Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    BasicTextField(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        decorationBox = { innerTextField ->
-                            if (searchQuery.isEmpty()) {
-                                Text(
-                                    text = "Ara...",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = if (isSearchActive) Arrangement.Start else Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        
+                        if (isSearchActive) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            BasicTextField(
+                                value = searchQuery,
+                                onValueChange = onSearchQueryChange,
+                                modifier = Modifier.weight(1f),
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.Normal
+                                ),
+                                decorationBox = { innerTextField ->
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            text = "Ara...",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Normal,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            )
+                            if (searchQuery.isNotEmpty()) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Temizle",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            onSearchQueryChange("")
+                                            isSearchActive = false
+                                        }
                                 )
                             }
-                            innerTextField()
                         }
-                    )
-                    if (searchQuery.isNotEmpty()) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Temizle",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(CircleShape)
-                                .clickable { onSearchQueryChange("") }
-                        )
                     }
                 }
             }
