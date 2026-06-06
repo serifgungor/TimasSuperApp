@@ -50,10 +50,11 @@ import kotlinx.coroutines.launch
 fun SuperAppSlider() {
     // Örnek slider öğeleri (Renkler ve başlıklar)
     val sliderItems = listOf(
-        Pair("Büyük Yaz İndirimi", listOf(Color(0xFFff9a9e), Color(0xFFfecfef))),
-        Pair("Yeni Sezon Ürünleri", listOf(Color(0xFFa18cd1), Color(0xFFfbc2eb))),
-        Pair("Fırsat Ürünleri %50", listOf(Color(0xFF84fab0), Color(0xFF8fd3f4))),
-        Pair("Ücretsiz Kargo", listOf(Color(0xFFfccb90), Color(0xFFd57eeb)))
+        Pair("Timaş Çocuk", "https://cdn.timas.com.tr/other/timascocukapp-banner-nisan2026.jpg"),
+        Pair("Mayıs Kitapları", "https://cdn.timas.com.tr/other/mayiskitaplari-banner-mayis2026.jpg"),
+        Pair("Kampanyalar", "https://cdn.timas.com.tr/other/kampanyalar.jpg"),
+        Pair("Timaş Europe", "https://cdn.timas.com.tr/other/timas-europe-banner-aralik2024.jpg"),
+        Pair("Okula Dönüş", "https://cdn.timas.com.tr/other/okul-banner.jpg")
     )
 
     val actualItemCount = sliderItems.size
@@ -103,13 +104,13 @@ fun SuperAppSlider() {
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Brush.linearGradient(item.second)),
+                        .background(Color.LightGray),
                     contentAlignment = Alignment.BottomStart
                 ) {
                     AsyncImage(
-                        model = "https://cdn.timas.com.tr/other/kampanyalar.jpg",
+                        model = item.second,
                         contentDescription = item.first,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillBounds,
                         modifier = Modifier.fillMaxSize()
                     )
                     
@@ -117,12 +118,12 @@ fun SuperAppSlider() {
                     Text(
                         text = item.first,
                         color = Color.White,
-                        fontSize = 20.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .padding(16.dp)
-                            .background(Color.Black.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .padding(12.dp)
+                            .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
