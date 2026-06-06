@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.timas.superapp.components.SuperAppToolbar
 import com.timas.superapp.components.SuperAppBottomNav
 import com.timas.superapp.components.SuperAppSlider
+import com.timas.superapp.components.QuickAppsSection
 import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
@@ -75,6 +76,7 @@ class MainActivity : ComponentActivity() {
                                 .verticalScroll(rememberScrollState())
                         ) {
                             SuperAppSlider()
+                            QuickAppsSection()
                             
                             Box(
                                 modifier = Modifier
