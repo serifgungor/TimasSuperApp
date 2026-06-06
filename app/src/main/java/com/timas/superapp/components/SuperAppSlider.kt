@@ -68,13 +68,19 @@ fun SuperAppSlider() {
     val coroutineScope = rememberCoroutineScope()
 
     val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
     val screenWidth = configuration.screenWidthDp.dp
     
-    // Ekran genişliğine göre duyarlı hesaplamalar
-    val horizontalPadding = screenWidth * 0.15f // Ekranın %15'i kadar kenar boşluğu
+    // Ekran genişliğine ve yönüne göre duyarlı hesaplamalar
+    val horizontalPadding = if (isPortrait) 16.dp else screenWidth * 0.15f
     val cardWidth = screenWidth - (horizontalPadding * 2)
-    val cardHeight = (cardWidth / 1.8f).coerceAtMost(220.dp) // 1.8 oran, tablette devasa olmaması için max 220dp
-    val arrowPadding = max(4.dp, (horizontalPadding - 36.dp) / 2)
+    val cardHeight = if (isPortrait) {
+        cardWidth / 1.8f
+    } else {
+        (cardWidth / 1.6f).coerceAtMost(300.dp) // Yatayda yüksekliği artırdık
+    }
+    // Okların hizalanması: Dikeyde kartın hemen içinde, yatayda ise dış boşlukta
+    val arrowPadding = if (isPortrait) 24.dp else max(4.dp, (horizontalPadding - 36.dp) / 2)
 
     // Otomatik kaydırma için
     LaunchedEffect(pagerState.settledPage) {
