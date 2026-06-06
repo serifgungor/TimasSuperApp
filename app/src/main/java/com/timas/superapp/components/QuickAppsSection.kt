@@ -90,12 +90,12 @@ fun QuickAppsSection() {
 fun QuickAppCard(app: QuickApp, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .width(88.dp)
+            .width(100.dp)
             .height(108.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = app.iconBgColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
