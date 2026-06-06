@@ -32,9 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import kotlin.math.absoluteValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,8 +57,17 @@ fun SuperAppSlider() {
     val pagerState = rememberPagerState(pageCount = { sliderItems.size })
     val coroutineScope = rememberCoroutineScope()
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    
+    // Ekran genişliğine göre duyarlı hesaplamalar
+    val horizontalPadding = screenWidth * 0.15f // Ekranın %15'i kadar kenar boşluğu
+    val cardWidth = screenWidth - (horizontalPadding * 2)
+    val cardHeight = (cardWidth / 1.8f).coerceAtMost(220.dp) // 1.8 oran, tablette devasa olmaması için max 220dp
+    val arrowPadding = max(4.dp, (horizontalPadding - 36.dp) / 2)
+
     // Otomatik kaydırma için
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(pagerState.settledPage) {
         delay(3000) // 3 saniyede bir kaydır
         var newPosition = pagerState.currentPage + 1
         if (newPosition > sliderItems.lastIndex) newPosition = 0
@@ -71,11 +85,12 @@ fun SuperAppSlider() {
                 state = pagerState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(280.dp),
+                    .height(cardHeight),
                 pageSpacing = 16.dp,
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp)
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = horizontalPadding)
             ) { page ->
                 val item = sliderItems[page]
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -107,8 +122,9 @@ fun SuperAppSlider() {
                 },
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 32.dp)
-                    .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                    .padding(start = arrowPadding)
+                    .size(36.dp)
+                    .background(Color.White.copy(alpha = 0.9f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowLeft,
@@ -127,8 +143,9 @@ fun SuperAppSlider() {
                 },
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 32.dp)
-                    .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                    .padding(end = arrowPadding)
+                    .size(36.dp)
+                    .background(Color.White.copy(alpha = 0.9f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
