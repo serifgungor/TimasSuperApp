@@ -89,14 +89,14 @@ fun QuickAppsSection() {
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
     
     val quickApps = listOf(
-        QuickApp("Kitap Satış", R.drawable.resim1, ActionType.WEB_VIEW, "https://www.timasyayingrubu.com"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
-        QuickApp("Timaş Okul", R.drawable.resim2, ActionType.WEB_VIEW, "https://www.timasokul.com"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
-        QuickApp("Timaş Portal", R.drawable.resim3, ActionType.WEB_VIEW, "https://portal.timas.com.tr"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
-        QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://bayi.timas.com.tr"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("Kitap Satış", R.drawable.resim1, ActionType.WEB_VIEW, "https://timas.com.tr"),
+        QuickApp("Timaş Okul", R.drawable.resim2, ActionType.WEB_VIEW, "https://www.timasokul.com"),
+        QuickApp("Timaş Portal", R.drawable.resim3, ActionType.WEB_VIEW, "https://portal.timas.com.tr"),
+        QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://timas.com.tr/b2b"),
         QuickApp("Kütüphanem", R.drawable.resim5, ActionType.NATIVE),
         QuickApp("Timaş Dijital", R.drawable.resim6, ActionType.NATIVE),
         QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY),
-        QuickApp("ZEKii", R.drawable.resim8, ActionType.WEB_VIEW, "https://www.zekii.com.tr"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("ZEKii", R.drawable.resim8, ActionType.NATIVE),
         QuickApp("Okuma Kulübü", R.drawable.resim9, ActionType.NATIVE),
         QuickApp("E-Book", R.drawable.resim10, ActionType.CUSTOM_PAGE),
         QuickApp("Sesli Kitap", R.drawable.resim11, ActionType.CUSTOM_PAGE)
