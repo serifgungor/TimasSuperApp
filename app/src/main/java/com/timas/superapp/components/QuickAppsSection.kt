@@ -18,13 +18,59 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.timas.superapp.R
+
+fun Modifier.dropShadow(
+    color: Color = Color.Black.copy(alpha = 0.1f),
+    borderRadius: Dp = 16.dp,
+    blurRadius: Dp = 10.dp,
+    offsetY: Dp = 6.dp,
+    offsetX: Dp = 4.dp,
+    spread: Dp = 0.dp
+) = this.drawBehind {
+    this.drawIntoCanvas { canvas ->
+        val paint = Paint()
+        val frameworkPaint = paint.asFrameworkPaint()
+        val spreadPixel = spread.toPx()
+        val leftPixel = offsetX.toPx() - spreadPixel
+        val topPixel = offsetY.toPx() - spreadPixel
+        val rightPixel = this.size.width + spreadPixel + offsetX.toPx()
+        val bottomPixel = this.size.height + spreadPixel + offsetY.toPx()
+
+        if (blurRadius != 0.dp) {
+            frameworkPaint.maskFilter = android.graphics.BlurMaskFilter(blurRadius.toPx(), android.graphics.BlurMaskFilter.Blur.NORMAL)
+        }
+
+        frameworkPaint.color = color.toArgb()
+        
+        canvas.nativeCanvas.drawRoundRect(
+            leftPixel,
+            topPixel,
+            rightPixel,
+            bottomPixel,
+            borderRadius.toPx(),
+            borderRadius.toPx(),
+            frameworkPaint
+        )
+    }
+}
 
 enum class ActionType {
     WEB_VIEW, NATIVE, GOOGLE_PLAY, CUSTOM_PAGE
@@ -32,9 +78,7 @@ enum class ActionType {
 
 data class QuickApp(
     val title: String,
-    val icon: ImageVector,
-    val iconTint: Color,
-    val iconBgColor: Color,
+    val imageRes: Int,
     val actionType: ActionType,
     val actionData: String = ""
 )
@@ -44,17 +88,18 @@ fun QuickAppsSection() {
     val context = LocalContext.current
     
     val quickApps = listOf(
-        QuickApp("Kitap Satış", Icons.Default.ShoppingBag, Color(0xFFD84315), Color(0xFFFBE9E7), ActionType.WEB_VIEW),
-        QuickApp("Timaş Okul", Icons.Default.School, Color(0xFF1565C0), Color(0xFFE3F2FD), ActionType.WEB_VIEW),
-        QuickApp("Timaş Portal", Icons.Default.Public, Color(0xFF4527A0), Color(0xFFEDE7F6), ActionType.WEB_VIEW),
-        QuickApp("Bayilik B2B", Icons.Default.Work, Color(0xFF6A1B9A), Color(0xFFF3E5F5), ActionType.WEB_VIEW),
-        QuickApp("Kütüphanem", Icons.Default.MenuBook, Color(0xFF00695C), Color(0xFFE0F2F1), ActionType.NATIVE),
-        QuickApp("Timaş Dijital", Icons.Default.Computer, Color(0xFF2E7D32), Color(0xFFE8F5E9), ActionType.NATIVE),
-        QuickApp("Timaş Çocuk", Icons.Default.ChildCare, Color(0xFFEF6C00), Color(0xFFFFF3E0), ActionType.GOOGLE_PLAY),
-        QuickApp("ZEKii", Icons.Default.Psychology, Color(0xFFC2185B), Color(0xFFFCE4EC), ActionType.WEB_VIEW),
-        QuickApp("Okuma Kulübü", Icons.Default.LocalLibrary, Color(0xFF00838F), Color(0xFFE0F7FA), ActionType.NATIVE),
-        QuickApp("E-Book", Icons.Default.Book, Color(0xFFD84315), Color(0xFFFBE9E7), ActionType.CUSTOM_PAGE),
-        QuickApp("Sesli Kitap", Icons.Default.Headphones, Color(0xFF4527A0), Color(0xFFEDE7F6), ActionType.CUSTOM_PAGE)
+        QuickApp("Uygulama 1", R.drawable.resim1, ActionType.WEB_VIEW),
+        QuickApp("Uygulama 2", R.drawable.resim2, ActionType.WEB_VIEW),
+        QuickApp("Uygulama 3", R.drawable.resim3, ActionType.WEB_VIEW),
+        QuickApp("Uygulama 4", R.drawable.resim4, ActionType.WEB_VIEW),
+        QuickApp("Uygulama 5", R.drawable.resim5, ActionType.NATIVE),
+        QuickApp("Uygulama 6", R.drawable.resim6, ActionType.NATIVE),
+        QuickApp("Uygulama 7", R.drawable.resim7, ActionType.GOOGLE_PLAY),
+        QuickApp("Uygulama 8", R.drawable.resim8, ActionType.WEB_VIEW),
+        QuickApp("Uygulama 9", R.drawable.resim9, ActionType.NATIVE),
+        QuickApp("Uygulama 10", R.drawable.resim10, ActionType.CUSTOM_PAGE),
+        QuickApp("Uygulama 11", R.drawable.resim11, ActionType.CUSTOM_PAGE),
+        QuickApp("Uygulama 12", R.drawable.resim12, ActionType.CUSTOM_PAGE)
     )
 
     Column(
@@ -88,38 +133,20 @@ fun QuickAppsSection() {
 
 @Composable
 fun QuickAppCard(app: QuickApp, onClick: () -> Unit) {
-    Card(
+    Image(
+        painter = painterResource(id = app.imageRes),
+        contentDescription = app.title,
         modifier = Modifier
-            .width(100.dp)
-            .height(108.dp)
+            .width(116.dp)
+            .height(124.dp)
+            .dropShadow(
+                color = Color.Black.copy(alpha = 0.15f),
+                borderRadius = 16.dp,
+                blurRadius = 10.dp,
+                offsetY = 4.dp,
+                offsetX = 2.dp
+            )
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = app.iconBgColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = app.icon,
-                contentDescription = app.title,
-                tint = app.iconTint,
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = app.title,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF334155),
-                textAlign = TextAlign.Center,
-                lineHeight = 14.sp,
-                maxLines = 2
-            )
-        }
-    }
+        contentScale = ContentScale.Fit
+    )
 }
