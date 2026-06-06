@@ -33,43 +33,41 @@ fun FullScreenWebViewDialog(
             decorFitsSystemWindows = true
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .systemBarsPadding()
-        ) {
-            // Top Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Kapat",
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clickable { onDismiss() },
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
-                )
+        androidx.compose.material3.Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                Column(modifier = Modifier.background(Color.White)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Kapat",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clickable { onDismiss() },
+                            tint = Color.Black
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = title,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Black
+                        )
+                    }
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
+                }
             }
-            
-            // Divider
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
-
-            // WebView
+        ) { paddingValues ->
             AndroidView(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 factory = { context ->
                     WebView(context).apply {
                         settings.javaScriptEnabled = true
