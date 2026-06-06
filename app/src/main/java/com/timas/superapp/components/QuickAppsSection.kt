@@ -14,7 +14,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,20 +86,20 @@ data class QuickApp(
 @Composable
 fun QuickAppsSection() {
     val context = LocalContext.current
+    var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
     
     val quickApps = listOf(
-        QuickApp("Uygulama 1", R.drawable.resim1, ActionType.WEB_VIEW),
-        QuickApp("Uygulama 2", R.drawable.resim2, ActionType.WEB_VIEW),
-        QuickApp("Uygulama 3", R.drawable.resim3, ActionType.WEB_VIEW),
-        QuickApp("Uygulama 4", R.drawable.resim4, ActionType.WEB_VIEW),
-        QuickApp("Uygulama 5", R.drawable.resim5, ActionType.NATIVE),
-        QuickApp("Uygulama 6", R.drawable.resim6, ActionType.NATIVE),
-        QuickApp("Uygulama 7", R.drawable.resim7, ActionType.GOOGLE_PLAY),
-        QuickApp("Uygulama 8", R.drawable.resim8, ActionType.WEB_VIEW),
-        QuickApp("Uygulama 9", R.drawable.resim9, ActionType.NATIVE),
-        QuickApp("Uygulama 10", R.drawable.resim10, ActionType.CUSTOM_PAGE),
-        QuickApp("Uygulama 11", R.drawable.resim11, ActionType.CUSTOM_PAGE),
-        QuickApp("Uygulama 12", R.drawable.resim12, ActionType.CUSTOM_PAGE)
+        QuickApp("Kitap Satış", R.drawable.resim1, ActionType.WEB_VIEW, "https://www.timasyayingrubu.com"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("Timaş Okul", R.drawable.resim2, ActionType.WEB_VIEW, "https://www.timasokul.com"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("Timaş Portal", R.drawable.resim3, ActionType.WEB_VIEW, "https://portal.timas.com.tr"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://bayi.timas.com.tr"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("Kütüphanem", R.drawable.resim5, ActionType.NATIVE),
+        QuickApp("Timaş Dijital", R.drawable.resim6, ActionType.NATIVE),
+        QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY),
+        QuickApp("ZEKii", R.drawable.resim8, ActionType.WEB_VIEW, "https://www.zekii.com.tr"), // LİNKİ BURADAN DEĞİŞTİREBİLİRSİNİZ
+        QuickApp("Okuma Kulübü", R.drawable.resim9, ActionType.NATIVE),
+        QuickApp("E-Book", R.drawable.resim10, ActionType.CUSTOM_PAGE),
+        QuickApp("Sesli Kitap", R.drawable.resim11, ActionType.CUSTOM_PAGE)
     )
 
     Column(
@@ -123,11 +123,22 @@ fun QuickAppsSection() {
         ) {
             items(quickApps) { app ->
                 QuickAppCard(app = app) {
-                    val message = "Aksiyon: ${app.actionType} -> ${app.title}"
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    if (app.actionType == ActionType.WEB_VIEW) {
+                        selectedApp = app
+                    } else {
+                        Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
+    }
+
+    selectedApp?.let { app ->
+        FullScreenWebViewDialog(
+            title = app.title,
+            url = app.actionData.ifEmpty { "https://www.google.com" },
+            onDismiss = { selectedApp = null }
+        )
     }
 }
 
