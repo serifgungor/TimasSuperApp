@@ -5,8 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,14 +25,10 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.FabPosition
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.unit.dp
 import com.timas.superapp.components.SuperAppToolbar
 import com.timas.superapp.components.SuperAppBottomNav
+import com.timas.superapp.components.SuperAppSlider
 import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
@@ -68,13 +68,22 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     ) { innerPadding ->
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(innerPadding),
-                            contentAlignment = Alignment.Center
+                                .padding(innerPadding)
+                                .verticalScroll(rememberScrollState())
                         ) {
-                            Greeting(name = "Super App'e Hoş Geldiniz")
+                            SuperAppSlider()
+                            
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Greeting(name = "Super App'e Hoş Geldiniz")
+                            }
                         }
                     }
                 }
