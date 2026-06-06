@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,7 +56,14 @@ fun SuperAppSlider() {
         Pair("Ücretsiz Kargo", listOf(Color(0xFFfccb90), Color(0xFFd57eeb)))
     )
 
-    val pagerState = rememberPagerState(pageCount = { sliderItems.size })
+    val actualItemCount = sliderItems.size
+    val startIndex = Int.MAX_VALUE / 2
+    val initialPage = startIndex - (startIndex % actualItemCount)
+
+    val pagerState = rememberPagerState(
+        initialPage = initialPage,
+        pageCount = { Int.MAX_VALUE }
+    )
     val coroutineScope = rememberCoroutineScope()
 
     val configuration = LocalConfiguration.current
@@ -69,9 +78,7 @@ fun SuperAppSlider() {
     // Otomatik kaydırma için
     LaunchedEffect(pagerState.settledPage) {
         delay(3000) // 3 saniyede bir kaydır
-        var newPosition = pagerState.currentPage + 1
-        if (newPosition > sliderItems.lastIndex) newPosition = 0
-        pagerState.animateScrollToPage(newPosition)
+        pagerState.animateScrollToPage(pagerState.currentPage + 1)
     }
 
     Column(
@@ -89,7 +96,8 @@ fun SuperAppSlider() {
                 pageSpacing = 16.dp,
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = horizontalPadding)
             ) { page ->
-                val item = sliderItems[page]
+                val actualPage = page % actualItemCount
+                val item = sliderItems[actualPage]
 
                 Box(
                     modifier = Modifier
@@ -98,7 +106,14 @@ fun SuperAppSlider() {
                         .background(Brush.linearGradient(item.second)),
                     contentAlignment = Alignment.BottomStart
                 ) {
-                    // Burada görsel (Image) de kullanılabilir. Şimdilik renkli arka plan ve metin kullanıyoruz.
+                    AsyncImage(
+                        model = "https://cdn.timas.com.tr/other/kampanyalar.jpg",
+                        contentDescription = item.first,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    
+                    // Metin alanı
                     Text(
                         text = item.first,
                         color = Color.White,
@@ -116,8 +131,7 @@ fun SuperAppSlider() {
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        val newPos = if (pagerState.currentPage > 0) pagerState.currentPage - 1 else sliderItems.lastIndex
-                        pagerState.animateScrollToPage(newPos)
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
                 },
                 modifier = Modifier
@@ -137,8 +151,7 @@ fun SuperAppSlider() {
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        val newPos = if (pagerState.currentPage < sliderItems.lastIndex) pagerState.currentPage + 1 else 0
-                        pagerState.animateScrollToPage(newPos)
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
                 },
                 modifier = Modifier
@@ -165,8 +178,9 @@ fun SuperAppSlider() {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            repeat(sliderItems.size) { iteration ->
-                val isSelected = pagerState.currentPage == iteration
+            val actualCurrentPage = pagerState.currentPage % actualItemCount
+            repeat(actualItemCount) { iteration ->
+                val isSelected = actualCurrentPage == iteration
                 val color = if (isSelected) Color(0xFFF26122) else Color.LightGray
                 val width = if (isSelected) 24.dp else 8.dp
 
