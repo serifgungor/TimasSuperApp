@@ -33,53 +33,80 @@ fun FullScreenWebViewDialog(
             decorFitsSystemWindows = true
         )
     ) {
-        androidx.compose.material3.Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                Column(modifier = Modifier.background(Color.White)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Kapat",
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clickable { onDismiss() },
-                            tint = Color.Black
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = title,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.Black
-                        )
+        val showWebView = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+        
+        androidx.compose.runtime.LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(400) // Dialog animasyonunun bitmesini bekle, böylece WebView ana thread'i kilitlediğinde titreme (gidip gelme) olmaz.
+            showWebView.value = true
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .systemBarsPadding()
+        ) {
+            // Top Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Kapat",
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable { onDismiss() },
+                    tint = Color.Black
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Black
+                )
+            }
+            
+            // Divider
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
+
+            // WebView
+            if (showWebView.value) {
+                AndroidView(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    factory = { context ->
+                        @android.annotation.SuppressLint("SetJavaScriptEnabled")
+                        val webView = WebView(context).apply {
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.loadsImagesAutomatically = true
+                            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                            
+                            // Ekran sığdırma ve ölçeklendirme ayarları
+                            settings.useWideViewPort = true
+                            settings.loadWithOverviewMode = true
+                            settings.builtInZoomControls = true
+                            settings.displayZoomControls = false
+
+                            webViewClient = WebViewClient()
+                            webChromeClient = android.webkit.WebChromeClient()
+                            loadUrl(url)
+                        }
+                        webView
+                    },
+                    update = { webView ->
+                        // Optional update logic
                     }
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
+                )
+            } else {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)
                 }
             }
-        ) { paddingValues ->
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                factory = { context ->
-                    WebView(context).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        webViewClient = WebViewClient()
-                        loadUrl(url)
-                    }
-                },
-                update = { webView ->
-                    // Optional update logic
-                }
-            )
         }
     }
 }

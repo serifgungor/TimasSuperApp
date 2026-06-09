@@ -31,10 +31,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import com.timas.superapp.Library3DScreen
 import com.timas.superapp.R
 
 fun Modifier.dropShadow(
@@ -87,6 +90,7 @@ data class QuickApp(
 fun QuickAppsSection() {
     val context = LocalContext.current
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
+    var showLibrary by remember { mutableStateOf(false) }
     
     val quickApps = listOf(
         QuickApp("Kitap Satış", R.drawable.resim1, ActionType.WEB_VIEW, "https://timas.com.tr"),
@@ -123,22 +127,66 @@ fun QuickAppsSection() {
         ) {
             items(quickApps) { app ->
                 QuickAppCard(app = app) {
-                    if (app.actionType == ActionType.WEB_VIEW) {
-                        selectedApp = app
-                    } else {
-                        Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
+                    when {
+                        app.actionType == ActionType.WEB_VIEW -> selectedApp = app
+                        app.title == "Kütüphanem" -> showLibrary = true
+                        else -> Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
     }
 
+    // WebView dialog
     selectedApp?.let { app ->
         FullScreenWebViewDialog(
             title = app.title,
             url = app.actionData.ifEmpty { "https://www.google.com" },
             onDismiss = { selectedApp = null }
         )
+    }
+
+    // Library3D tam ekran dialog
+    if (showLibrary) {
+        Dialog(
+            onDismissRequest = { showLibrary = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = true
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFE9E1D6))
+                    .systemBarsPadding()
+            ) {
+                // Üst bar - geri git butonu
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(Color(0xFFE9E1D6))
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Geri",
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clickable { showLibrary = false },
+                        tint = Color(0xFF3B2A1A)
+                    )
+                }
+                // Ayırıcı çizgi
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFCBBDA7)))
+                // Library ekranı
+                Box(modifier = Modifier.weight(1f)) {
+                    Library3DScreen()
+                }
+            }
+        }
     }
 }
 
