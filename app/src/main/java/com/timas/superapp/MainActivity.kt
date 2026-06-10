@@ -20,9 +20,12 @@ import com.timas.superapp.components.SuperAppBottomNav
 import com.timas.superapp.components.SuperAppToolbar
 import com.timas.superapp.components.SuperAppSlider
 import com.timas.superapp.components.QuickAppsSection
+import com.timas.superapp.screens.LoginScreen
 import com.timas.superapp.screens.QrScannerScreen
 import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.ui.theme.TimasTheme
+
+private enum class AppScreen { HOME, LOGIN, QR_SCANNER }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,58 +38,69 @@ class MainActivity : ComponentActivity() {
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
                 } else {
+                    var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
                     var searchQuery by remember { mutableStateOf("") }
                     var selectedBottomTab by remember { mutableStateOf(0) }
-                    var showQrScanner by remember { mutableStateOf(false) }   // ← YENİ
                     val focusManager = LocalFocusManager.current
 
-                    // QR Ekranı açıksa onu göster
-                    if (showQrScanner) {
-                        QrScannerScreen(
-                            onBack = { showQrScanner = false },
-                            onQrScanned = { result ->
-                                // QR sonucunu burada işleyin
-                                // Örn: Toast, navigasyon, API çağrısı vs.
-                                showQrScanner = false
-                            }
-                        )
-                    } else {
-                        Scaffold(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .pointerInput(Unit) {
-                                    detectTapGestures(onTap = { focusManager.clearFocus() })
-                                },
-                            topBar = {
-                                SuperAppToolbar(
-                                    searchQuery = searchQuery,
-                                    onSearchQueryChange = { searchQuery = it }
-                                )
-                            },
-                            bottomBar = {
-                                SuperAppBottomNav(
-                                    selectedIndex = selectedBottomTab,
-                                    onTabSelected = { selectedBottomTab = it },
-                                    onQrClick = { showQrScanner = true }   // ← YENİ
-                                )
-                            }
-                        ) { innerPadding ->
-                            Column(
+                    when (currentScreen) {
+
+                        AppScreen.LOGIN -> {
+                            LoginScreen(
+                                onBack = { currentScreen = AppScreen.HOME },
+                                onLoginSuccess = { currentScreen = AppScreen.HOME }
+                            )
+                        }
+
+                        AppScreen.QR_SCANNER -> {
+                            QrScannerScreen(
+                                onBack = { currentScreen = AppScreen.HOME },
+                                onQrScanned = { result ->
+                                    // QR sonucunu burada işleyin
+                                    currentScreen = AppScreen.HOME
+                                }
+                            )
+                        }
+
+                        AppScreen.HOME -> {
+                            Scaffold(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(innerPadding)
-                                    .verticalScroll(rememberScrollState())
-                            ) {
-                                SuperAppSlider()
-                                QuickAppsSection()
-
-                                Box(
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(onTap = { focusManager.clearFocus() })
+                                    },
+                                topBar = {
+                                    SuperAppToolbar(
+                                        searchQuery = searchQuery,
+                                        onSearchQueryChange = { searchQuery = it },
+                                        onProfileClick = { currentScreen = AppScreen.LOGIN }
+                                    )
+                                },
+                                bottomBar = {
+                                    SuperAppBottomNav(
+                                        selectedIndex = selectedBottomTab,
+                                        onTabSelected = { selectedBottomTab = it },
+                                        onQrClick = { currentScreen = AppScreen.QR_SCANNER }
+                                    )
+                                }
+                            ) { innerPadding ->
+                                Column(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 32.dp),
-                                    contentAlignment = Alignment.Center
+                                        .fillMaxSize()
+                                        .padding(innerPadding)
+                                        .verticalScroll(rememberScrollState())
                                 ) {
-                                    Text(text = "Super App'e Hoş Geldiniz")
+                                    SuperAppSlider()
+                                    QuickAppsSection()
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "Super App'e Hoş Geldiniz")
+                                    }
                                 }
                             }
                         }
