@@ -12,7 +12,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -42,10 +46,27 @@ class MainActivity : ComponentActivity() {
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
                 } else {
+                    var showLoginSheet by remember { mutableStateOf(false) }
                     var scannedQrResult by remember { mutableStateOf<String?>(null) }
                     var searchQuery by remember { mutableStateOf("") }
                     var selectedBottomTab by remember { mutableStateOf(0) }
                     val focusManager = LocalFocusManager.current
+
+                    if (showLoginSheet) {
+                        Dialog(
+                            onDismissRequest = { showLoginSheet = false }
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = Color.White
+                            ) {
+                                LoginScreen(
+                                    onBack = { showLoginSheet = false },
+                                    onLoginSuccess = { showLoginSheet = false }
+                                )
+                            }
+                        }
+                    }
 
                     scannedQrResult?.let { result ->
                         AlertDialog(
@@ -66,10 +87,8 @@ class MainActivity : ComponentActivity() {
                         }
 
                         AppScreen.LOGIN -> {
-                            LoginScreen(
-                                onBack = { currentScreen = AppScreen.HOME },
-                                onLoginSuccess = { currentScreen = AppScreen.HOME }
-                            )
+                            // LoginScreen is now a ModalBottomSheet
+                            currentScreen = AppScreen.HOME
                         }
 
                         AppScreen.QR_SCANNER -> {
@@ -93,7 +112,7 @@ class MainActivity : ComponentActivity() {
                                     SuperAppToolbar(
                                         searchQuery = searchQuery,
                                         onSearchQueryChange = { searchQuery = it },
-                                        onProfileClick = { currentScreen = AppScreen.LOGIN }
+                                        onProfileClick = { showLoginSheet = true }
                                     )
                                 },
                                 bottomBar = {
