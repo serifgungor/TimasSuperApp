@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,54 +32,55 @@ fun FullScreenWebViewDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = true
+            decorFitsSystemWindows = false // Edge-to-edge
         )
     ) {
-        val showWebView = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-        
-        androidx.compose.runtime.LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(400) // Dialog animasyonunun bitmesini bekle, böylece WebView ana thread'i kilitlediğinde titreme (gidip gelme) olmaz.
-            showWebView.value = true
-        }
+        val isLoading = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(true) }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .systemBarsPadding()
-        ) {
-            // Top Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Kapat",
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clickable { onDismiss() },
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Black
-                )
+        androidx.compose.material3.Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.White,
+            topBar = {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                            .statusBarsPadding() // Sadece üst durum çubuğu boşluğu
+                            .height(56.dp)
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                            contentDescription = "Geri",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clickable { onDismiss() },
+                            tint = Color.Black
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = title,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Black
+                        )
+                    }
+                    // Divider
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
+                }
             }
-            
-            // Divider
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
-
-            // WebView
-            if (showWebView.value) {
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues) // Padding ÖNCE uygulanmalı
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                // WebView
                 AndroidView(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     factory = { context ->
                         @android.annotation.SuppressLint("SetJavaScriptEnabled")
                         val webView = WebView(context).apply {
@@ -86,25 +89,34 @@ fun FullScreenWebViewDialog(
                             settings.loadsImagesAutomatically = true
                             settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                             
-                            // Ekran sığdırma ve ölçeklendirme ayarları
                             settings.useWideViewPort = true
                             settings.loadWithOverviewMode = true
                             settings.builtInZoomControls = true
                             settings.displayZoomControls = false
 
-                            webViewClient = WebViewClient()
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    isLoading.value = false
+                                }
+                            }
                             webChromeClient = android.webkit.WebChromeClient()
                             loadUrl(url)
                         }
                         webView
-                    },
-                    update = { webView ->
-                        // Optional update logic
                     }
                 )
-            } else {
-                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)
+
+                // Loader Overlay
+                if (isLoading.value) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(color = Color.Gray)
+                    }
                 }
             }
         }

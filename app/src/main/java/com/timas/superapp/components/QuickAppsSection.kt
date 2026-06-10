@@ -87,7 +87,7 @@ data class QuickApp(
 )
 
 @Composable
-fun QuickAppsSection() {
+fun QuickAppsSection(onNavigateToZekii: () -> Unit = {}) {
     val context = LocalContext.current
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
     var showLibrary by remember { mutableStateOf(false) }
@@ -100,10 +100,10 @@ fun QuickAppsSection() {
         QuickApp("Kütüphanem", R.drawable.resim5, ActionType.NATIVE),
         QuickApp("Timaş Dijital", R.drawable.resim6, ActionType.NATIVE),
         QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY),
-        QuickApp("ZEKii", R.drawable.resim8, ActionType.NATIVE),
+        QuickApp("ZEKii", R.drawable.resim11, ActionType.NATIVE),
         QuickApp("Okuma Kulübü", R.drawable.resim9, ActionType.NATIVE),
         QuickApp("E-Book", R.drawable.resim10, ActionType.CUSTOM_PAGE),
-        QuickApp("Sesli Kitap", R.drawable.resim11, ActionType.CUSTOM_PAGE)
+        QuickApp("Sesli Kitap", R.drawable.resim8, ActionType.CUSTOM_PAGE)
     )
 
     Column(
@@ -127,10 +127,18 @@ fun QuickAppsSection() {
         ) {
             items(quickApps) { app ->
                 QuickAppCard(app = app) {
-                    when {
-                        app.actionType == ActionType.WEB_VIEW -> selectedApp = app
-                        app.title == "Kütüphanem" -> showLibrary = true
-                        else -> Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
+                    val titleLower = app.title.lowercase(java.util.Locale.ROOT)
+                    val isZekii = titleLower.contains("zek")
+                    
+                    if (app.actionType == ActionType.WEB_VIEW) {
+                        selectedApp = app
+                    } else if (app.title == "Kütüphanem") {
+                        showLibrary = true
+                    } else if (isZekii) {
+                        Toast.makeText(context, "ZEKİİ Açılıyor...", Toast.LENGTH_SHORT).show()
+                        onNavigateToZekii()
+                    } else {
+                        Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

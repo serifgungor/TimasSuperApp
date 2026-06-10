@@ -23,6 +23,7 @@ import com.timas.superapp.components.QuickAppsSection
 import com.timas.superapp.screens.LoginScreen
 import com.timas.superapp.screens.QrScannerScreen
 import com.timas.superapp.screens.SplashScreen
+import com.timas.superapp.screens.ZekiiScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
 private enum class AppScreen { HOME, LOGIN, QR_SCANNER }
@@ -34,9 +35,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             TimasTheme {
                 var showSplash by remember { mutableStateOf(true) }
+                var currentScreen by remember { mutableStateOf("home") }
 
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
+                } else if (currentScreen == "zekii") {
+                    ZekiiScreen(onBack = { currentScreen = "home" })
                 } else {
                     var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
                     var searchQuery by remember { mutableStateOf("") }
@@ -91,7 +95,7 @@ class MainActivity : ComponentActivity() {
                                         .verticalScroll(rememberScrollState())
                                 ) {
                                     SuperAppSlider()
-                                    QuickAppsSection()
+                                    QuickAppsSection(onNavigateToZekii = { currentScreen = "zekii" })
 
                                     Box(
                                         modifier = Modifier
