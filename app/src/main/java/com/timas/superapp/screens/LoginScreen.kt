@@ -5,8 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Phone
@@ -449,14 +451,14 @@ private fun BasicOtpField(
     onBackspace: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
+    BasicTextField(
         value = value,
         onValueChange = { new ->
             if (new.isEmpty()) onBackspace()
             else onValueChange(new)
         },
         modifier = modifier.focusRequester(focusRequester),
-        textStyle = LocalTextStyle.current.copy(
+        textStyle = TextStyle(
             textAlign = TextAlign.Center,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
@@ -467,12 +469,14 @@ private fun BasicOtpField(
             keyboardType = KeyboardType.NumberPassword,
             imeAction = ImeAction.Next
         ),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
-        )
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                innerTextField()
+            }
+        }
     )
 }
 
