@@ -193,7 +193,7 @@ fun ZekiiScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(Color(0xFFF1F5F9)) // Hafif grimsi/mavi arka plan
         ) {
             // Mod Çipleri Satırı (Header'ın hemen altında)

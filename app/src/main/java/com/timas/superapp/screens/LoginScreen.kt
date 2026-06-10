@@ -173,7 +173,7 @@ private fun PhoneStep(
     isLoading: Boolean,
     onContinue: () -> Unit
 ) {
-    val isValid = phoneNumber.filter { it.isDigit() }.length >= 10
+    val isValid = phoneNumber.filter { it.isDigit() }.length == 10
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -197,12 +197,15 @@ private fun PhoneStep(
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { new ->
-                val digits = new.filter { it.isDigit() }
-                if (digits.length <= 11) onPhoneChange(digits)
+                var digits = new.filter { it.isDigit() }
+                if (digits.startsWith("0")) {
+                    digits = digits.substring(1)
+                }
+                if (digits.length <= 10) onPhoneChange(digits)
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Telefon Numarası") },
-            placeholder = { Text("05XX XXX XX XX") },
+            placeholder = { Text("5XX XXX XX XX") },
             prefix = { Text("🇹🇷 +90  ", color = TextMuted) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
