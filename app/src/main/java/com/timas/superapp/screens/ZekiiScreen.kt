@@ -304,10 +304,9 @@ fun ZekiiScreen(
                         onValueChange = { inputText = it },
                         modifier = Modifier
                             .weight(1f)
-                            .height(52.dp)
                             .background(Color(0xFFF8FAFC), RoundedCornerShape(26.dp))
                             .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp))
-                            .padding(horizontal = 20.dp),
+                            .padding(horizontal = 20.dp, vertical = 14.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Send
@@ -325,7 +324,7 @@ fun ZekiiScreen(
                         ),
                         decorationBox = { innerTextField ->
                             Box(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.fillMaxWidth(),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 if (inputText.isEmpty()) {
