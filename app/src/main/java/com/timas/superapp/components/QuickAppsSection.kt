@@ -87,7 +87,10 @@ data class QuickApp(
 )
 
 @Composable
-fun QuickAppsSection(onNavigateToZekii: () -> Unit = {}) {
+fun QuickAppsSection(
+    onNavigateToZekii: () -> Unit = {},
+    onNavigateToSesliKitap: () -> Unit = {}
+) {
     val context = LocalContext.current
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
     var showLibrary by remember { mutableStateOf(false) }
@@ -129,6 +132,7 @@ fun QuickAppsSection(onNavigateToZekii: () -> Unit = {}) {
                 QuickAppCard(app = app) {
                     val titleLower = app.title.lowercase(java.util.Locale.ROOT)
                     val isZekii = titleLower.contains("zek")
+                    val isSesliKitap = titleLower.contains("sesli")
                     
                     if (app.actionType == ActionType.WEB_VIEW) {
                         selectedApp = app
@@ -137,6 +141,9 @@ fun QuickAppsSection(onNavigateToZekii: () -> Unit = {}) {
                     } else if (isZekii) {
                         Toast.makeText(context, "ZEKİİ Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToZekii()
+                    } else if (isSesliKitap) {
+                        Toast.makeText(context, "Sesli Kitap Açılıyor...", Toast.LENGTH_SHORT).show()
+                        onNavigateToSesliKitap()
                     } else {
                         Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
                     }

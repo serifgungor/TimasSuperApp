@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
@@ -30,9 +31,10 @@ import com.timas.superapp.screens.LoginScreen
 import com.timas.superapp.screens.QrScannerScreen
 import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.screens.ZekiiScreen
+import com.timas.superapp.screens.SesliKitapScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
-private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII }
+private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII, SESLI_KITAP }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,9 +56,14 @@ class MainActivity : ComponentActivity() {
 
                     if (showLoginSheet) {
                         Dialog(
-                            onDismissRequest = { showLoginSheet = false }
+                            onDismissRequest = { showLoginSheet = false },
+                            properties = DialogProperties(usePlatformDefaultWidth = false)
                         ) {
                             Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp)
+                                    .wrapContentHeight(),
                                 shape = RoundedCornerShape(16.dp),
                                 color = Color.White
                             ) {
@@ -84,6 +91,10 @@ class MainActivity : ComponentActivity() {
                     when (currentScreen) {
                         AppScreen.ZEKII -> {
                             ZekiiScreen(onBack = { currentScreen = AppScreen.HOME })
+                        }
+ 
+                        AppScreen.SESLI_KITAP -> {
+                            SesliKitapScreen(onBack = { currentScreen = AppScreen.HOME })
                         }
 
                         AppScreen.LOGIN -> {
@@ -130,7 +141,10 @@ class MainActivity : ComponentActivity() {
                                         .verticalScroll(rememberScrollState())
                                 ) {
                                     SuperAppSlider()
-                                    QuickAppsSection(onNavigateToZekii = { currentScreen = AppScreen.ZEKII })
+                                    QuickAppsSection(
+                                        onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
+                                        onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP }
+                                    )
 
                                     Box(
                                         modifier = Modifier
