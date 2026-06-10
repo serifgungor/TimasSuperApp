@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -50,19 +51,18 @@ fun ZekiiScreen(
     val listState = rememberLazyListState()
 
     // Mesaj Listesi Başlangıç Değerleri
-    var messages by remember {
-        mutableStateOf(
-            listOf(
-                Message(
-                    id = "1",
-                    text = "Merhaba! Ben ZEKİİ. Bugün nasıl hissediyorsun? Sana en uygun kitabı önerebilirim.",
-                    isFromBot = true
-                )
+    val messages = remember {
+        mutableStateListOf(
+            Message(
+                id = "1",
+                text = "Merhaba! Ben ZEKİİ. Bugün nasıl hissediyorsun? Sana en uygun kitabı önerebilirim.",
+                isFromBot = true
             )
         )
     }
 
     var inputText by remember { mutableStateOf("") }
+    var scrollTrigger by remember { mutableStateOf(0) }
 
     // Mood listesi
     val moods = listOf(
@@ -73,9 +73,10 @@ fun ZekiiScreen(
         "Yeni bir şey öğrenmek istiyorum"
     )
 
-    // Yeni mesaj eklendiğinde otomatik aşağı kaydır
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
+    // Yeni mesaj eklendiğinde veya aksiyon gerçekleştiğinde otomatik aşağı kaydır
+    LaunchedEffect(scrollTrigger) {
+        if (scrollTrigger > 0 && messages.isNotEmpty()) {
+            delay(100) // Render işleminin tamamlanması için küçük bir gecikme
             listState.animateScrollToItem(messages.size - 1)
         }
     }
@@ -85,18 +86,21 @@ fun ZekiiScreen(
         coroutineScope.launch {
             // "Yazıyor..." durumunu ekle
             val typingId = System.currentTimeMillis().toString()
-            messages = messages + Message(
-                id = typingId,
-                text = "",
-                isFromBot = true,
-                isTyping = true
+            messages.add(
+                Message(
+                    id = typingId,
+                    text = "",
+                    isFromBot = true,
+                    isTyping = true
+                )
             )
-
+            scrollTrigger++
+            
             // 1 saniye simüle et
             delay(1200)
 
             // "Yazıyor..." mesajını kaldır
-            messages = messages.filter { it.id != typingId }
+            messages.removeAll { it.id == typingId }
 
             // Cevabı belirle
             val botText = when (userMsg.trim().lowercase()) {
@@ -121,23 +125,29 @@ fun ZekiiScreen(
             }
 
             // Bot cevabını ekle
-            messages = messages + Message(
-                id = System.currentTimeMillis().toString(),
-                text = botText,
-                isFromBot = true
+            messages.add(
+                Message(
+                    id = System.currentTimeMillis().toString(),
+                    text = botText,
+                    isFromBot = true
+                )
             )
+            scrollTrigger++
         }
     }
 
     // Kullanıcı Mesaj Gönderme
     fun sendMessage(text: String) {
         if (text.trim().isEmpty()) return
-        messages = messages + Message(
-            id = System.currentTimeMillis().toString(),
-            text = text,
-            isFromBot = false
+        messages.add(
+            Message(
+                id = System.currentTimeMillis().toString(),
+                text = text,
+                isFromBot = false
+            )
         )
         inputText = ""
+        scrollTrigger++
         handleBotResponse(text)
     }
 
@@ -176,25 +186,6 @@ fun ZekiiScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1E293B)
                     )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // Bildirim İkonu (Yuvarlak Beyaz Arka Plan)
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .shadow(2.dp, CircleShape)
-                            .background(Color.White, CircleShape)
-                            .clickable { /* Bildirim aksiyonu */ },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = "Bildirimler",
-                            tint = Color(0xFF1E293B),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
                 }
             }
         }
@@ -308,23 +299,15 @@ fun ZekiiScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     // Mesaj yazma kutusu
-                    TextField(
+                    BasicTextField(
                         value = inputText,
                         onValueChange = { inputText = it },
-                        placeholder = { Text("Mesajınızı yazın...", color = Color(0xFF94A3B8)) },
                         modifier = Modifier
                             .weight(1f)
                             .height(52.dp)
-                            .clip(RoundedCornerShape(26.dp))
-                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp)),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFF8FAFC),
-                            unfocusedContainerColor = Color(0xFFF8FAFC),
-                            disabledContainerColor = Color(0xFFF8FAFC),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
-                        ),
+                            .background(Color(0xFFF8FAFC), RoundedCornerShape(26.dp))
+                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp))
+                            .padding(horizontal = 20.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Send
@@ -335,7 +318,26 @@ fun ZekiiScreen(
                                     sendMessage(inputText)
                                 }
                             }
-                        )
+                        ),
+                        textStyle = LocalTextStyle.current.copy(
+                            color = Color(0xFF1E293B),
+                            fontSize = 15.sp
+                        ),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (inputText.isEmpty()) {
+                                    Text(
+                                        text = "Mesajınızı yazın...",
+                                        color = Color(0xFF94A3B8),
+                                        fontSize = 15.sp
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
