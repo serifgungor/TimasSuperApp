@@ -26,7 +26,7 @@ import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.screens.ZekiiScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
-private enum class AppScreen { HOME, LOGIN, QR_SCANNER }
+private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,19 +35,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             TimasTheme {
                 var showSplash by remember { mutableStateOf(true) }
-                var currentScreen by remember { mutableStateOf("home") }
+                var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
 
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
-                } else if (currentScreen == "zekii") {
-                    ZekiiScreen(onBack = { currentScreen = "home" })
                 } else {
-                    var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
                     var searchQuery by remember { mutableStateOf("") }
                     var selectedBottomTab by remember { mutableStateOf(0) }
                     val focusManager = LocalFocusManager.current
 
                     when (currentScreen) {
+                        AppScreen.ZEKII -> {
+                            ZekiiScreen(onBack = { currentScreen = AppScreen.HOME })
+                        }
 
                         AppScreen.LOGIN -> {
                             LoginScreen(
@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                                         .verticalScroll(rememberScrollState())
                                 ) {
                                     SuperAppSlider()
-                                    QuickAppsSection(onNavigateToZekii = { currentScreen = "zekii" })
+                                    QuickAppsSection(onNavigateToZekii = { currentScreen = AppScreen.ZEKII })
 
                                     Box(
                                         modifier = Modifier
