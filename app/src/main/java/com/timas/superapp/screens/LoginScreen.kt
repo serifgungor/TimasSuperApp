@@ -204,9 +204,13 @@ private fun PhoneStep(
                 if (digits.length <= 10) onPhoneChange(digits)
             },
             modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                fontSize = 14.sp,
+                color = TextMain
+            ),
             label = { Text("Telefon Numarası") },
-            placeholder = { Text("5XX XXX XX XX") },
-            prefix = { Text("🇹🇷 +90  ", color = TextMuted) },
+            placeholder = { Text("5XX XXX XX XX", fontSize = 14.sp) },
+            prefix = { Text("🇹🇷 +90 ", fontSize = 14.sp, color = TextMuted) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Phone,
@@ -319,7 +323,8 @@ private fun OtpStep(
 
         // OTP kutucukları
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             otpValues.forEachIndexed { index, value ->
@@ -347,7 +352,8 @@ private fun OtpStep(
                             updated[index] = ""
                             otpValues = updated
                         }
-                    }
+                    },
+                    modifier = Modifier.weight(1f).aspectRatio(1f)
                 )
             }
         }
@@ -425,7 +431,8 @@ private fun OtpCell(
     isFocused: Boolean,
     focusRequester: FocusRequester,
     onValueChange: (String) -> Unit,
-    onBackspace: () -> Unit
+    onBackspace: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val borderColor = if (value.isNotEmpty()) Orange else BorderClr
 
@@ -434,8 +441,7 @@ private fun OtpCell(
         focusRequester = focusRequester,
         onValueChange = onValueChange,
         onBackspace = onBackspace,
-        modifier = Modifier
-            .size(48.dp)
+        modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .border(
