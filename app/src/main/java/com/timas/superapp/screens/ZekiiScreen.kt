@@ -306,7 +306,7 @@ fun ZekiiScreen(
                             .weight(1f)
                             .background(Color(0xFFF8FAFC), RoundedCornerShape(26.dp))
                             .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp))
-                            .padding(horizontal = 20.dp, vertical = 14.dp),
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Send
@@ -318,9 +318,9 @@ fun ZekiiScreen(
                                 }
                             }
                         ),
-                        textStyle = LocalTextStyle.current.copy(
+                        textStyle = androidx.compose.ui.text.TextStyle(
                             color = Color(0xFF1E293B),
-                            fontSize = 15.sp
+                            fontSize = 13.sp
                         ),
                         decorationBox = { innerTextField ->
                             Box(
@@ -331,7 +331,7 @@ fun ZekiiScreen(
                                     Text(
                                         text = "Mesajınızı yazın...",
                                         color = Color(0xFF94A3B8),
-                                        fontSize = 15.sp
+                                        fontSize = 13.sp
                                     )
                                 }
                                 innerTextField()
