@@ -90,7 +90,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(horizontal = 28.dp),
+                    .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -209,8 +209,8 @@ private fun PhoneStep(
                 color = TextMain
             ),
             label = { Text("Telefon Numarası") },
-            placeholder = { Text("5XX XXX XX XX", fontSize = 14.sp) },
-            prefix = { Text("🇹🇷 +90 ", fontSize = 14.sp, color = TextMuted) },
+            placeholder = { Text("5XX XXX XX XX", fontSize = 13.sp, maxLines = 1, softWrap = false) },
+            prefix = { Text("🇹🇷 +90 ", fontSize = 13.sp, color = TextMuted, maxLines = 1, softWrap = false) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Phone,
@@ -324,7 +324,7 @@ private fun OtpStep(
         // OTP kutucukları
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             otpValues.forEachIndexed { index, value ->
