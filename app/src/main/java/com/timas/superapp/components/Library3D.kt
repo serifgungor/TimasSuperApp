@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 
 // ---------------- DATA ----------------
@@ -53,26 +55,24 @@ fun Library3DScreen() {
     ) {
 
         Column {
-
-            Text(
-                "📚 Kütüphane",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3B2A1A)
-            )
-
-            Spacer(Modifier.height(20.dp))
-
             Shelf(books) { book ->
                 selectedBook = book
             }
         }
 
         if (selectedBook != null) {
-            BookModal(
-                book = selectedBook!!,
-                onDismiss = { selectedBook = null }
-            )
+            Dialog(
+                onDismissRequest = { selectedBook = null },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = true
+                )
+            ) {
+                com.timas.superapp.screens.BookDetailScreen(
+                    book = selectedBook!!,
+                    onBack = { selectedBook = null }
+                )
+            }
         }
     }
 }

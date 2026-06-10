@@ -186,6 +186,13 @@ fun QuickAppsSection(onNavigateToZekii: () -> Unit = {}) {
                             .clickable { showLibrary = false },
                         tint = Color(0xFF3B2A1A)
                     )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "📚 Kütüphane",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3B2A1A)
+                    )
                 }
                 // Ayırıcı çizgi
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFCBBDA7)))
