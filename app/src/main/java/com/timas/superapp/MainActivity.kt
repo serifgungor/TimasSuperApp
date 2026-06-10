@@ -10,6 +10,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,9 +42,23 @@ class MainActivity : ComponentActivity() {
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
                 } else {
+                    var scannedQrResult by remember { mutableStateOf<String?>(null) }
                     var searchQuery by remember { mutableStateOf("") }
                     var selectedBottomTab by remember { mutableStateOf(0) }
                     val focusManager = LocalFocusManager.current
+
+                    scannedQrResult?.let { result ->
+                        AlertDialog(
+                            onDismissRequest = { scannedQrResult = null },
+                            title = { Text("QR Kod Okundu") },
+                            text = { Text("Değer: $result") },
+                            confirmButton = {
+                                TextButton(onClick = { scannedQrResult = null }) {
+                                    Text("Tamam")
+                                }
+                            }
+                        )
+                    }
 
                     when (currentScreen) {
                         AppScreen.ZEKII -> {
@@ -60,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             QrScannerScreen(
                                 onBack = { currentScreen = AppScreen.HOME },
                                 onQrScanned = { result ->
-                                    // QR sonucunu burada işleyin
+                                    scannedQrResult = result
                                     currentScreen = AppScreen.HOME
                                 }
                             )
