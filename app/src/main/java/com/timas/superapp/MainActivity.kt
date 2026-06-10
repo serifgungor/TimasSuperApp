@@ -32,9 +32,10 @@ import com.timas.superapp.screens.QrScannerScreen
 import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.screens.ZekiiScreen
 import com.timas.superapp.screens.SesliKitapScreen
+import com.timas.superapp.screens.EBookScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
-private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII, SESLI_KITAP }
+private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII, SESLI_KITAP, E_BOOK }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,6 +97,10 @@ class MainActivity : ComponentActivity() {
                         AppScreen.SESLI_KITAP -> {
                             SesliKitapScreen(onBack = { currentScreen = AppScreen.HOME })
                         }
+ 
+                        AppScreen.E_BOOK -> {
+                            EBookScreen(onBack = { currentScreen = AppScreen.HOME })
+                        }
 
                         AppScreen.LOGIN -> {
                             // LoginScreen is now a ModalBottomSheet
@@ -143,7 +148,8 @@ class MainActivity : ComponentActivity() {
                                     SuperAppSlider()
                                     QuickAppsSection(
                                         onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
-                                        onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP }
+                                        onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
+                                        onNavigateToEBook = { currentScreen = AppScreen.E_BOOK }
                                     )
 
                                     Box(

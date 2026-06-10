@@ -89,7 +89,8 @@ data class QuickApp(
 @Composable
 fun QuickAppsSection(
     onNavigateToZekii: () -> Unit = {},
-    onNavigateToSesliKitap: () -> Unit = {}
+    onNavigateToSesliKitap: () -> Unit = {},
+    onNavigateToEBook: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
@@ -104,8 +105,8 @@ fun QuickAppsSection(
         QuickApp("Timaş Dijital", R.drawable.resim6, ActionType.NATIVE),
         QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY),
         QuickApp("ZEKii", R.drawable.resim11, ActionType.NATIVE),
-        QuickApp("Okuma Kulübü", R.drawable.resim9, ActionType.NATIVE),
-        QuickApp("E-Book", R.drawable.resim10, ActionType.CUSTOM_PAGE),
+        QuickApp("Okuma Kulübü", R.drawable.resim10, ActionType.NATIVE),
+        QuickApp("E-Book", R.drawable.resim9, ActionType.CUSTOM_PAGE),
         QuickApp("Sesli Kitap", R.drawable.resim8, ActionType.CUSTOM_PAGE)
     )
 
@@ -133,6 +134,7 @@ fun QuickAppsSection(
                     val titleLower = app.title.lowercase(java.util.Locale.ROOT)
                     val isZekii = titleLower.contains("zek")
                     val isSesliKitap = titleLower.contains("sesli")
+                    val isEBook = titleLower.contains("book")
                     
                     if (app.actionType == ActionType.WEB_VIEW) {
                         selectedApp = app
@@ -144,6 +146,9 @@ fun QuickAppsSection(
                     } else if (isSesliKitap) {
                         Toast.makeText(context, "Sesli Kitap Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToSesliKitap()
+                    } else if (isEBook) {
+                        Toast.makeText(context, "E-Book Açılıyor...", Toast.LENGTH_SHORT).show()
+                        onNavigateToEBook()
                     } else {
                         Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
                     }
