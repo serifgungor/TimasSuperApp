@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -53,7 +54,7 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
 
     val events = listOf(
         DashboardEvent("Yazarlarla Buluşma", "15 Haziran", Icons.Default.Groups, Color(0xFFF26122)),
-        DashboardEvent("Okuma Kulübü", "Her Cumartesi", Icons.Default.MenuBook, Color(0xFF4AC2E3)),
+        DashboardEvent("Okuma Kulübü", "Her Cumartesi", Icons.AutoMirrored.Filled.MenuBook, Color(0xFF4AC2E3)),
         DashboardEvent("Şiir Dinletisi", "21 Mart", Icons.Default.Mic, Color(0xFF9C27B0)),
         DashboardEvent("İstanbul Kitap Fuarı", "1-3 Kasım", Icons.Default.Event, Color(0xFF4AC2E3)),
         DashboardEvent("Çocuk Şenliği", "23 Nisan", Icons.Default.ChildCare, Color(0xFFF26122)),
@@ -361,3 +362,5 @@ fun EventDetailDialog(event: DashboardEvent, onDismiss: () -> Unit, onKatilClick
         }
     }
 }
+
+

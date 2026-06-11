@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -187,7 +188,7 @@ fun SesliKitapScreen(
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowLeft,
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = "Geri",
                             tint = DarkSlate,
                             modifier = Modifier.size(32.dp)
@@ -840,7 +841,7 @@ private fun AudioPlayerView(
             ) {
                 IconButton(onClick = onMuteToggle) {
                     Icon(
-                        imageVector = if (isMuted || volume == 0f) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                        imageVector = if (isMuted || volume == 0f) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                         contentDescription = "Ses Seviyesi",
                         tint = TextMain
                     )
@@ -898,3 +899,5 @@ private fun formatTime(seconds: Int): String {
         String.format("%02d:%02d", m, s)
     }
 }
+
+

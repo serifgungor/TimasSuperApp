@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -242,7 +243,7 @@ fun EBookScreen(
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowLeft,
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = "Geri",
                             tint = DarkSlate,
                             modifier = Modifier.size(32.dp)
@@ -872,7 +873,7 @@ private fun EBookReaderView(
                 )
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.KeyboardArrowLeft, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null, modifier = Modifier.size(16.dp))
                     Text("Önceki", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
@@ -902,9 +903,11 @@ private fun EBookReaderView(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Sonraki", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(16.dp))
                 }
             }
         }
     }
 }
+
+

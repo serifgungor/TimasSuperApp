@@ -156,34 +156,44 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             ) { innerPadding ->
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(innerPadding)
-                                        .verticalScroll(rememberScrollState())
-                                ) {
-                                    SuperAppSlider()
-                                    QuickAppsSection(
-                                        onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
-                                        onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
-                                        onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
-                                        onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU },
-                                        onNavigateToTimasDijital = { currentScreen = AppScreen.TIMAS_DIJITAL }
-                                    )
-
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    com.timas.superapp.components.HomeDashboardSection(
-                                        onKatilClick = { eventTitle ->
-                                            coroutineScope.launch {
-                                                snackbarHostState.showSnackbar("$eventTitle etkinliğine katılım talebiniz alındı.")
+                                if (selectedBottomTab == 1) {
+                                    Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+                                        com.timas.superapp.screens.SearchDiscoverScreen(searchQuery = searchQuery)
+                                    }
+                                } else {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(innerPadding)
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        SuperAppSlider()
+                                        QuickAppsSection(
+                                            onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
+                                            onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
+                                            onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
+                                            onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU },
+                                            onNavigateToTimasDijital = { currentScreen = AppScreen.TIMAS_DIJITAL }
+                                        )
+    
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        com.timas.superapp.components.HomeDashboardSection(
+                                            onKatilClick = { eventTitle ->
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("$eventTitle etkinliğine katılım talebiniz alındı.")
+                                                }
                                             }
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    com.timas.superapp.components.KategorilerSection()
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    com.timas.superapp.components.GamesAndTvSection()
-                                    Spacer(modifier = Modifier.height(32.dp))
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        com.timas.superapp.components.KategorilerSection()
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        com.timas.superapp.components.GamesAndTvSection()
+                                        
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        com.timas.superapp.components.KampanyalarSection()
+                                        
+                                        Spacer(modifier = Modifier.height(32.dp))
+                                    }
                                 }
                             }
                         }
