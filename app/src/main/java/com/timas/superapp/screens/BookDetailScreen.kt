@@ -70,8 +70,9 @@ fun BookDetailScreen(
                 color = TextDark
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
-            
+            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+            val isTablet = configuration.screenWidthDp >= 600
+
             // Kapak ve Önsöz / Yazar Görseli
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -79,7 +80,7 @@ fun BookDetailScreen(
             ) {
                 // Kitap Kapağı
                 Card(
-                    modifier = Modifier.weight(1f),
+                    modifier = if (isTablet) Modifier.width(240.dp) else Modifier.weight(1f),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     shape = RoundedCornerShape(8.dp)
@@ -104,11 +105,11 @@ fun BookDetailScreen(
                     }
                 }
                 
-                Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(32.dp))
                 
                 // Sağ taraf: Önsöz ve Yazar resmi
                 Column(
-                    modifier = Modifier.weight(1.2f)
+                    modifier = if (isTablet) Modifier.weight(1f) else Modifier.weight(1.2f)
                 ) {
                     Text(
                         text = "Önsöz",

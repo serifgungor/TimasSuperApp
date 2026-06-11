@@ -179,6 +179,10 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
                                     )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    com.timas.superapp.components.KategorilerSection()
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    com.timas.superapp.components.GamesAndTvSection()
                                     Spacer(modifier = Modifier.height(32.dp))
                                 }
                             }

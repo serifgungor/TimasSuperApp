@@ -129,7 +129,7 @@ fun Shelf(
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
         ) {
 
             books.forEach { book ->
