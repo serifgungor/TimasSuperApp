@@ -13,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.timas.superapp.components.SuperAppBottomNav
 import com.timas.superapp.components.SuperAppToolbar
 import com.timas.superapp.components.SuperAppSlider
@@ -56,6 +59,9 @@ class MainActivity : ComponentActivity() {
                     var searchQuery by remember { mutableStateOf("") }
                     var selectedBottomTab by remember { mutableStateOf(0) }
                     val focusManager = LocalFocusManager.current
+                    
+                    val snackbarHostState = remember { SnackbarHostState() }
+                    val coroutineScope = rememberCoroutineScope()
 
                     if (showLoginSheet) {
                         Dialog(
@@ -134,6 +140,7 @@ class MainActivity : ComponentActivity() {
                                     .pointerInput(Unit) {
                                         detectTapGestures(onTap = { focusManager.clearFocus() })
                                     },
+                                snackbarHost = { SnackbarHost(snackbarHostState) },
                                 topBar = {
                                     SuperAppToolbar(
                                         searchQuery = searchQuery,
@@ -164,14 +171,15 @@ class MainActivity : ComponentActivity() {
                                         onNavigateToTimasDijital = { currentScreen = AppScreen.TIMAS_DIJITAL }
                                     )
 
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 32.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(text = "Super App'e Hoş Geldiniz")
-                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    com.timas.superapp.components.HomeDashboardSection(
+                                        onKatilClick = { eventTitle ->
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("$eventTitle etkinliğine katılım talebiniz alındı.")
+                                            }
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(32.dp))
                                 }
                             }
                         }
