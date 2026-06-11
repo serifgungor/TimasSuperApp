@@ -78,22 +78,30 @@ fun BookDetailScreen(
                 verticalAlignment = Alignment.Top
             ) {
                 // Kitap Kapağı
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .aspectRatio(0.65f)
-                        .shadow(8.dp)
-                        .background(book.color)
-                        .padding(12.dp),
-                    contentAlignment = Alignment.Center
+                Card(
+                    modifier = Modifier.weight(1f),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(
-                        text = book.title.uppercase(),
-                        fontFamily = FontFamily.Serif,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .aspectRatio(0.65f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(book.color)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = book.title.uppercase(),
+                            fontFamily = FontFamily.Serif,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
                 
                 Spacer(modifier = Modifier.width(20.dp))
@@ -153,54 +161,63 @@ fun BookDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             val similarBooks = listOf(
-                Book("Körler Ülkesi", "H.G. Wells", Color(0xFF6B2D45)),
-                Book("Drakula", "Bram Stoker", Color(0xFF2C3E50)),
-                Book("Frankenstein", "Mary Shelley", Color(0xFF4A6D53)),
-                Book("Robinson Crusoe", "Daniel Defoe", Color(0xFF3498DB))
+                Book("Kürk Mantolu", "Sabahattin Ali", Color(0xFF6B2D45)),
+                Book("Şeker Portakalı", "Vasconcelos", Color(0xFF2C3E50)),
+                Book("Simyacı", "Paulo Coelho", Color(0xFF4A6D53)),
+                Book("Suç ve Ceza", "Dostoyevski", Color(0xFF3498DB))
             )
             
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(similarBooks) { sBook ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.width(100.dp)
+                    Card(
+                        modifier = Modifier.width(140.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Box(
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .width(100.dp)
-                                .height(150.dp)
-                                .shadow(4.dp)
-                                .background(sBook.color)
-                                .padding(8.dp),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .padding(8.dp)
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(0.7f)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(sBook.color)
+                                    .padding(4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = sBook.title,
+                                    fontFamily = FontFamily.Serif,
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = sBook.title,
                                 fontFamily = FontFamily.Serif,
-                                color = Color.White,
                                 fontSize = 12.sp,
+                                color = TextDark,
+                                maxLines = 1,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = sBook.author,
+                                fontFamily = FontFamily.Serif,
+                                fontSize = 10.sp,
+                                color = TextGray,
+                                maxLines = 1,
                                 textAlign = TextAlign.Center
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = sBook.title,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 12.sp,
-                            color = TextDark,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = sBook.author,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 10.sp,
-                            color = TextGray,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }

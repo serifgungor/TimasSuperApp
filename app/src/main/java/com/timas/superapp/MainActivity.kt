@@ -33,9 +33,11 @@ import com.timas.superapp.screens.SplashScreen
 import com.timas.superapp.screens.ZekiiScreen
 import com.timas.superapp.screens.SesliKitapScreen
 import com.timas.superapp.screens.EBookScreen
+import com.timas.superapp.screens.OkumaKulubuScreen
+import com.timas.superapp.screens.TimasDijitalScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
-private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII, SESLI_KITAP, E_BOOK }
+private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII, SESLI_KITAP, E_BOOK, OKUMA_KULUBU, TIMAS_DIJITAL }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,6 +103,14 @@ class MainActivity : ComponentActivity() {
                         AppScreen.E_BOOK -> {
                             EBookScreen(onBack = { currentScreen = AppScreen.HOME })
                         }
+                        
+                        AppScreen.OKUMA_KULUBU -> {
+                            OkumaKulubuScreen(onBack = { currentScreen = AppScreen.HOME })
+                        }
+                        
+                        AppScreen.TIMAS_DIJITAL -> {
+                            TimasDijitalScreen(onBack = { currentScreen = AppScreen.HOME })
+                        }
 
                         AppScreen.LOGIN -> {
                             // LoginScreen is now a ModalBottomSheet
@@ -149,7 +159,9 @@ class MainActivity : ComponentActivity() {
                                     QuickAppsSection(
                                         onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
                                         onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
-                                        onNavigateToEBook = { currentScreen = AppScreen.E_BOOK }
+                                        onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
+                                        onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU },
+                                        onNavigateToTimasDijital = { currentScreen = AppScreen.TIMAS_DIJITAL }
                                     )
 
                                     Box(

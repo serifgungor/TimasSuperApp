@@ -7,7 +7,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,11 +42,27 @@ data class Book(
 fun Library3DScreen() {
 
     val books = listOf(
-        Book("Clean Code", "Robert Martin", Color(0xFF9C1B1B)),
-        Book("Dune", "Frank Herbert", Color(0xFF1F4EA3)),
+        Book("Devlet Ana", "Kemal Tahir", Color(0xFF9C1B1B)),
+        Book("Yaban", "Yakup Kadri", Color(0xFF1F4EA3)),
         Book("Sapiens", "Yuval Harari", Color(0xFF2F7D32)),
         Book("1984", "George Orwell", Color(0xFF6D2DBD)),
         Book("Nutuk", "M. Kemal Atatürk", Color(0xFFD35400))
+    )
+
+    val books2 = listOf(
+        Book("Osmancık", "Tarık Buğra", Color(0xFF6B2D45)),
+        Book("Serenad", "Zülfü Livaneli", Color(0xFF2C3E50)),
+        Book("İnce Memed", "Yaşar Kemal", Color(0xFF4A6D53)),
+        Book("Saatleri Ayarlama", "Ahmet Hamdi", Color(0xFF3498DB)),
+        Book("Sefiller", "Victor Hugo", Color(0xFF8E44AD))
+    )
+
+    val books3 = listOf(
+        Book("Suç ve Ceza", "Dostoyevski", Color(0xFFC0392B)),
+        Book("Satranç", "Stefan Zweig", Color(0xFF27AE60)),
+        Book("Dönüşüm", "Franz Kafka", Color(0xFF2980B9)),
+        Book("Simyacı", "Paulo Coelho", Color(0xFFF39C12)),
+        Book("Devlet-i Aliyye", "Halil İnalcık", Color(0xFF7F8C8D))
     )
 
     var selectedBook by remember { mutableStateOf<Book?>(null) }
@@ -51,11 +71,20 @@ fun Library3DScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFE9E1D6))
-            .padding(16.dp)
     ) {
 
-        Column {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             Shelf(books) { book ->
+                selectedBook = book
+            }
+            Shelf(books2) { book ->
+                selectedBook = book
+            }
+            Shelf(books3) { book ->
                 selectedBook = book
             }
         }
@@ -89,13 +118,12 @@ fun Shelf(
         modifier = Modifier
             .fillMaxWidth()
             .height(260.dp)
-            .clip(RoundedCornerShape(10.dp))
             .background(
                 Brush.verticalGradient(
                     listOf(Color(0xFF7A5234), Color(0xFF5C3D24))
                 )
             )
-            .padding(12.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
 
         Row(

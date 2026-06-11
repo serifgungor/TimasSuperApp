@@ -90,7 +90,9 @@ data class QuickApp(
 fun QuickAppsSection(
     onNavigateToZekii: () -> Unit = {},
     onNavigateToSesliKitap: () -> Unit = {},
-    onNavigateToEBook: () -> Unit = {}
+    onNavigateToEBook: () -> Unit = {},
+    onNavigateToOkumaKulubu: () -> Unit = {},
+    onNavigateToTimasDijital: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
@@ -103,7 +105,7 @@ fun QuickAppsSection(
         QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://timas.com.tr/b2b"),
         QuickApp("Kütüphanem", R.drawable.resim5, ActionType.NATIVE),
         QuickApp("Timaş Dijital", R.drawable.resim6, ActionType.NATIVE),
-        QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY),
+        QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY, "https://play.google.com/store/apps/details?id=com.timas.cocuk"),
         QuickApp("ZEKii", R.drawable.resim11, ActionType.NATIVE),
         QuickApp("Okuma Kulübü", R.drawable.resim10, ActionType.NATIVE),
         QuickApp("E-Book", R.drawable.resim9, ActionType.CUSTOM_PAGE),
@@ -135,6 +137,8 @@ fun QuickAppsSection(
                     val isZekii = titleLower.contains("zek")
                     val isSesliKitap = titleLower.contains("sesli")
                     val isEBook = titleLower.contains("book")
+                    val isOkumaKulubu = titleLower.contains("okuma")
+                    val isTimasDijital = titleLower.contains("dijital")
                     
                     if (app.actionType == ActionType.WEB_VIEW) {
                         selectedApp = app
@@ -149,6 +153,15 @@ fun QuickAppsSection(
                     } else if (isEBook) {
                         Toast.makeText(context, "E-Book Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToEBook()
+                    } else if (isOkumaKulubu) {
+                        Toast.makeText(context, "Okuma Kulübü Açılıyor...", Toast.LENGTH_SHORT).show()
+                        onNavigateToOkumaKulubu()
+                    } else if (isTimasDijital) {
+                        Toast.makeText(context, "Timaş Dijital Açılıyor...", Toast.LENGTH_SHORT).show()
+                        onNavigateToTimasDijital()
+                    } else if (app.actionType == ActionType.GOOGLE_PLAY && app.actionData.isNotEmpty()) {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(app.actionData))
+                        context.startActivity(intent)
                     } else {
                         Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
                     }
