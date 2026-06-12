@@ -24,10 +24,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -51,12 +57,20 @@ fun ZekiiScreen(
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+    val maxBubbleWidth = if (isTablet) {
+        (configuration.screenWidthDp * 0.5f).dp
+    } else {
+        (configuration.screenWidthDp * 0.8f).dp
+    }
+
     // Mesaj Listesi Başlangıç Değerleri
     val messages = remember {
         mutableStateListOf(
             Message(
                 id = "1",
-                text = "Merhaba! Ben ZEKİİ. Bugün nasıl hissediyorsun? Sana en uygun kitabı önerebilirim.",
+                text = "Merhaba, ben Zekiii. Timaş Dijital'in geliştirdiği bir yapay zekayım. Size nasıl yardımcı olabilirim?",
                 isFromBot = true
             )
         )
@@ -121,7 +135,7 @@ fun ZekiiScreen(
                     "“Yeni bir şey öğrenmek istiyorum” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: Sapiens\nYazar: Yuval Noah Harari"
                 }
                 else -> {
-                    "Mesajınızı aldım! 🤖 Sana en uygun kitapları araştırıyorum. Şimdilik mod butonlarını kullanarak hızlı öneriler alabilirsin! 📚"
+                    "Şu an demo modunda çalışmaktayım, sadece belirli sorulara cevap verebiliyorum. 😊 Yukarıdaki mod butonlarını kullanarak hızlıca harika kitap önerileri alabilirsin! 📚✨"
                 }
             }
 
@@ -181,6 +195,18 @@ fun ZekiiScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
+                    Image(
+                        painter = painterResource(id = com.timas.superapp.R.drawable.zekii_chatbot_logo),
+                        contentDescription = "ZEKİİ Logo",
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .border(1.dp, Color(0xFFCBD5E1), CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
                     Text(
                         text = "ZEKİİ",
                         fontSize = 20.sp,
@@ -224,16 +250,59 @@ fun ZekiiScreen(
                 }
             }
 
-            // Sohbet Mesajları Alanı
-            LazyColumn(
-                state = listState,
+            // Sohbet Mesajları Alanı (WhatsApp tarzı desenli arka planlı Box)
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
+                    .background(Color(0xFFE8E2D9)) // WhatsApp beji arka plan rengi
+                    .drawWithCache {
+                        val patternEmojis = listOf("📚", "📖", "✏️", "✨", "💡", "🎓", "🖋️")
+                        val emojiPaint = android.graphics.Paint().apply {
+                            textSize = 34.dp.toPx() // Daha büyük boyut
+                            textAlign = android.graphics.Paint.Align.CENTER
+                            alpha = (255 * 0.12f).toInt() // Daha belirgin (%12 opaklık)
+                        }
+                        
+                        onDrawBehind {
+                            val stepX = 100.dp.toPx() // Emojilerin çakışmaması için daha geniş aralık
+                            val stepY = 100.dp.toPx()
+                            val width = size.width
+                            val height = size.height
+                            
+                            var rowIndex = 0
+                            var y = 25.dp.toPx()
+                            while (y < height) {
+                                val offsetX = if (rowIndex % 2 == 0) 0f else stepX / 2f
+                                var x = offsetX + 25.dp.toPx()
+                                var colIndex = 0
+                                while (x < width) {
+                                    val emojiIndex = (rowIndex * 7 + colIndex) % patternEmojis.size
+                                    val emoji = patternEmojis[emojiIndex]
+                                    val rotation = ((rowIndex * 3 + colIndex * 5) % 40) - 20f
+                                    
+                                    drawContext.canvas.nativeCanvas.save()
+                                    drawContext.canvas.nativeCanvas.rotate(rotation, x, y)
+                                    drawContext.canvas.nativeCanvas.drawText(emoji, x, y, emojiPaint)
+                                    drawContext.canvas.nativeCanvas.restore()
+                                    
+                                    x += stepX
+                                    colIndex++
+                                }
+                                y += stepY
+                                rowIndex++
+                            }
+                        }
+                    }
             ) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(vertical = 16.dp)
+                ) {
                 items(messages) { message ->
                     if (message.isFromBot) {
                         // Zekii Mesaj Balonu
@@ -243,7 +312,7 @@ fun ZekiiScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .widthIn(max = 280.dp)
+                                    .widthIn(max = maxBubbleWidth)
                                     .shadow(2.dp, RoundedCornerShape(topStart = 0.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp))
                                     .background(Color.White, RoundedCornerShape(topStart = 0.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp))
                                     .padding(16.dp)
@@ -269,7 +338,7 @@ fun ZekiiScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .widthIn(max = 280.dp)
+                                    .widthIn(max = maxBubbleWidth)
                                     .shadow(2.dp, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 0.dp))
                                     .background(Color(0xFFF26122), RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 0.dp))
                                     .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -285,6 +354,7 @@ fun ZekiiScreen(
                     }
                 }
             }
+        }
 
             // Alt Mesaj Giriş Alanı
             Box(

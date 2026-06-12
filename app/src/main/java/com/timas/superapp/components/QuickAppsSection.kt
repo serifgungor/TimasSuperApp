@@ -92,8 +92,7 @@ fun QuickAppsSection(
     onNavigateToZekii: () -> Unit = {},
     onNavigateToSesliKitap: () -> Unit = {},
     onNavigateToEBook: () -> Unit = {},
-    onNavigateToOkumaKulubu: () -> Unit = {},
-    onNavigateToTimasDijital: () -> Unit = {}
+    onNavigateToOkumaKulubu: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedApp by remember { mutableStateOf<QuickApp?>(null) }
@@ -103,9 +102,8 @@ fun QuickAppsSection(
         QuickApp("Kitap Satış", R.drawable.resim1, ActionType.WEB_VIEW, "https://timas.com.tr"),
         QuickApp("Timaş Okul", R.drawable.resim2, ActionType.WEB_VIEW, "https://www.timasokul.com"),
         QuickApp("Timaş Portal", R.drawable.resim3, ActionType.WEB_VIEW, "https://portal.timas.com.tr"),
-        QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://timas.com.tr/b2b"),
+        QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://timasdagitim.com/"),
         QuickApp("Kütüphanem", R.drawable.resim5, ActionType.NATIVE),
-        QuickApp("Timaş Dijital", R.drawable.resim6, ActionType.NATIVE),
         QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY, "https://play.google.com/store/apps/details?id=com.timas.cocuk"),
         QuickApp("ZEKii", R.drawable.resim11, ActionType.NATIVE),
         QuickApp("Okuma Kulübü", R.drawable.resim10, ActionType.NATIVE),
@@ -139,27 +137,19 @@ fun QuickAppsSection(
                     val isSesliKitap = titleLower.contains("sesli")
                     val isEBook = titleLower.contains("book")
                     val isOkumaKulubu = titleLower.contains("okuma")
-                    val isTimasDijital = titleLower.contains("dijital")
                     
                     if (app.actionType == ActionType.WEB_VIEW) {
                         selectedApp = app
                     } else if (app.title == "Kütüphanem") {
                         showLibrary = true
                     } else if (isZekii) {
-                        Toast.makeText(context, "ZEKİİ Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToZekii()
                     } else if (isSesliKitap) {
-                        Toast.makeText(context, "Sesli Kitap Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToSesliKitap()
                     } else if (isEBook) {
-                        Toast.makeText(context, "E-Book Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToEBook()
                     } else if (isOkumaKulubu) {
-                        Toast.makeText(context, "Okuma Kulübü Açılıyor...", Toast.LENGTH_SHORT).show()
                         onNavigateToOkumaKulubu()
-                    } else if (isTimasDijital) {
-                        Toast.makeText(context, "Timaş Dijital Açılıyor...", Toast.LENGTH_SHORT).show()
-                        onNavigateToTimasDijital()
                     } else if (app.actionType == ActionType.GOOGLE_PLAY && app.actionData.isNotEmpty()) {
                         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(app.actionData))
                         context.startActivity(intent)
@@ -237,8 +227,8 @@ fun QuickAppCard(app: QuickApp, onClick: () -> Unit) {
         painter = painterResource(id = app.imageRes),
         contentDescription = app.title,
         modifier = Modifier
-            .width(116.dp)
-            .height(124.dp)
+            .width(132.dp)
+            .height(140.dp)
             .dropShadow(
                 color = Color.Black.copy(alpha = 0.15f),
                 borderRadius = 16.dp,
