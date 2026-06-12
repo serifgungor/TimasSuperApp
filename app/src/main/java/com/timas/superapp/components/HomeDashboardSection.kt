@@ -69,7 +69,7 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Box(modifier = Modifier.weight(1.4f)) { YeniGelenler(books) }
-            Box(modifier = Modifier.weight(1f).height(295.dp)) { 
+            Box(modifier = Modifier.weight(1f).height(380.dp)) { 
                 EtkinlikTakvimi(
                     events = events, 
                     onKatilClick = onKatilClick,
@@ -114,8 +114,15 @@ fun YeniGelenler(books: List<DashboardBook>) {
 
 @Composable
 fun BookCard(book: DashboardBook, onInceleClick: () -> Unit) {
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+    val cardWidth = if (isTablet) 170.dp else 130.dp
+    val imageHeight = if (isTablet) 240.dp else 185.dp
+    val titleFontSize = if (isTablet) 14.sp else 12.sp
+    val authorFontSize = if (isTablet) 12.sp else 10.sp
+    val buttonFontSize = if (isTablet) 12.sp else 10.sp
+
     Card(
-        modifier = Modifier.width(130.dp),
+        modifier = Modifier.width(cardWidth),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -130,13 +137,13 @@ fun BookCard(book: DashboardBook, onInceleClick: () -> Unit) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(185.dp)
+                    .height(imageHeight)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                     .background(Color.LightGray)
             )
             Column(modifier = Modifier.padding(8.dp)) {
-                Text(book.title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFF1E293B), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(book.author, fontSize = 10.sp, color = Color.Gray, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(book.title, fontWeight = FontWeight.Bold, fontSize = titleFontSize, color = Color(0xFF1E293B), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(book.author, fontSize = authorFontSize, color = Color.Gray, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier
@@ -144,10 +151,10 @@ fun BookCard(book: DashboardBook, onInceleClick: () -> Unit) {
                         .clip(RoundedCornerShape(6.dp))
                         .background(Color(0xFFF26122))
                         .clickable { onInceleClick() }
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = if (isTablet) 6.dp else 4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("İncele", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text("İncele", color = Color.White, fontSize = buttonFontSize, fontWeight = FontWeight.Bold)
                 }
             }
         }
