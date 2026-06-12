@@ -76,9 +76,9 @@ fun SuperAppSlider() {
     val horizontalPadding = if (isPortrait) 16.dp else screenWidth * 0.15f
     val cardWidth = screenWidth - (horizontalPadding * 2)
     val cardHeight = if (isPortrait) {
-        cardWidth / 1.8f
+        cardWidth / 1.6f
     } else {
-        (cardWidth / 1.6f).coerceAtMost(300.dp) // Yatayda yüksekliği artırdık
+        (cardWidth / 1.4f).coerceAtMost(360.dp)
     }
     // Okların hizalanması: Dikeyde kartın hemen içinde, yatayda ise dış boşlukta
     val arrowPadding = if (isPortrait) 24.dp else max(4.dp, (horizontalPadding - 36.dp) / 2)
