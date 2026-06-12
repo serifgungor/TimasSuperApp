@@ -164,13 +164,7 @@ class MainActivity : ComponentActivity() {
                                             .verticalScroll(rememberScrollState())
                                     ) {
                                         SuperAppSlider()
-                                        QuickAppsSection(
-                                            onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
-                                            onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
-                                            onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
-                                            onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU }
-                                        )
-    
+                                        com.timas.superapp.components.KategorilerSection()
                                         Spacer(modifier = Modifier.height(16.dp))
                                         com.timas.superapp.components.HomeDashboardSection(
                                             onKatilClick = { eventTitle ->
@@ -180,7 +174,12 @@ class MainActivity : ComponentActivity() {
                                             }
                                         )
                                         Spacer(modifier = Modifier.height(16.dp))
-                                        com.timas.superapp.components.KategorilerSection()
+                                        QuickAppsSection(
+                                            onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
+                                            onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
+                                            onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
+                                            onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU }
+                                        )
                                         Spacer(modifier = Modifier.height(16.dp))
                                         com.timas.superapp.components.GamesAndTvSection()
                                         

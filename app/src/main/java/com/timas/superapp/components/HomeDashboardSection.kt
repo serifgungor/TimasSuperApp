@@ -43,13 +43,16 @@ data class DashboardEvent(
 fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
+    val bookCardHeight = if (isTablet) 325.dp else 255.dp
 
     val books = listOf(
         DashboardBook("Mutluluğun İnşası", "Mecit Ömür Öztürk", "https://cdn.timas.com.tr/urun/mutlulugun-insasi-9786050849745.jpg", "Mutluluğa giden yolda içsel bir rehber."),
         DashboardBook("Dilin Afetleri", "İmam Gazzâlî", "https://cdn.timas.com.tr/urun/dilin-afetleri-9786259445182.jpg", "Dilin tehlikeleri ve korunma yolları."),
         DashboardBook("Kur'an Atlası", "Timaş Yayınları", "https://cdn.timas.com.tr/urun/kuran-atlasi-9786256360525.jpg", "Kur'an-ı Kerim'i anlamaya yardımcı eşsiz bir kaynak."),
         DashboardBook("Kalpsizler", "Marissa Meyer", "https://cdn.timas.com.tr/urun/kalpsizler-9786050847642.jpg", "Modern insanın duygusal yabancılaşmasını anlatan güçlü bir roman."),
-        DashboardBook("Politik Bir Beden...", "Timaş Yayınları", "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300", "Siyaset ve insan bedeni üzerine derin bir inceleme.")
+        DashboardBook("Politik Bir Beden...", "Timaş Yayınları", "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300", "Siyaset ve insan bedeni üzerine derin bir inceleme."),
+        DashboardBook("Tavuk Bacaklı Ev...", "Sophie Anderson", "https://satinal.timas.com.tr/tavuk-bacakli-ev-kaciyor-bilim-kurgu-ve-fantastik-genc-timas-sophie-anderson-37697-14-O.jpg", "Marinka kendini bildi bileli tavuk bacakları olan bir evde yaşadı. O ev sayesinde dünyayı dolaştı ve akla hayale sığmayacak maceralara atıldı. Ne var ki Marinka'nın tavuk bacaklı evi, eski neşesini kaybediyor gibiydi. Marinka, evin neden böyle davrandığını anlamaya çalışırken ev birden koşmaya başladı. Tavuk bacaklı ev kaçıyordu! Marinka ve arkadaşları, evin peşinden koşarlarken kendilerini hangi maceraların beklediğinden habersizlerdi. Tavuk bacaklı ev neden kaçıyordu? Acaba kaçmayı bırakıp Marinka ve arkadaşlarının kendisine yardım etmesine izin verecek miydi? Tavuk Bacaklı Ev Kaçıyor, serinin ilk kitabını sevenlere muhteşem bir macera daha vadediyor."),
+        DashboardBook("Ağaçların Fısıltısı", "Murat Moroğlu", "https://satinal.timas.com.tr/agaclarin-fisiltisi-umutlu-kitaplar-timas-cocuk-murat-moroglu-37713-14-O.webp", "Çorak topraklardan yemyeşil masal diyarına uzanan bir yolculuk… Okul ödevi için mahallenin sessiz kahramanı Yılmaz amcanın kapısını çalan Ece, onu bekleyen sürprizden habersizdir. Yıllar önce bir çocuğun koca bir bozkırı ormana dönüştürme hayaliyle başlayan bu serüven, Ece’nin ellerinde yeniden canlanır. Bir insanın azmi dünyayı nasıl değiştirir? “Ağaçların Fısıltısı”, sizi vazgeçmeyen kalplerin yazdığı o yeşil mucizeye davet ediyor.")
     )
 
     val events = listOf(
@@ -69,11 +72,13 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Box(modifier = Modifier.weight(1.4f)) { YeniGelenler(books) }
-            Box(modifier = Modifier.weight(1f).height(380.dp)) { 
+            Box(modifier = Modifier.weight(1f)) { 
                 EtkinlikTakvimi(
                     events = events, 
                     onKatilClick = onKatilClick,
-                    listModifier = Modifier.verticalScroll(rememberScrollState())
+                    listModifier = Modifier
+                        .height(bookCardHeight)
+                        .verticalScroll(rememberScrollState())
                 ) 
             }
         }
@@ -81,7 +86,15 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.padding(horizontal = 16.dp)) { YeniGelenler(books) }
             Spacer(modifier = Modifier.height(24.dp))
-            Box(modifier = Modifier.padding(horizontal = 16.dp)) { EtkinlikTakvimi(events, onKatilClick) }
+            Box(modifier = Modifier.padding(horizontal = 16.dp)) { 
+                EtkinlikTakvimi(
+                    events = events, 
+                    onKatilClick = onKatilClick,
+                    listModifier = Modifier
+                        .height(bookCardHeight)
+                        .verticalScroll(rememberScrollState())
+                ) 
+            }
         }
     }
 }
@@ -102,7 +115,7 @@ fun YeniGelenler(books: List<DashboardBook>) {
         Spacer(modifier = Modifier.height(12.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             items(books) { book ->
-                BookCard(book, onInceleClick = { selectedBook = book })
+                BookCard(book = book, onInceleClick = { selectedBook = book })
             }
         }
     }
@@ -116,18 +129,21 @@ fun YeniGelenler(books: List<DashboardBook>) {
 fun BookCard(book: DashboardBook, onInceleClick: () -> Unit) {
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
     val cardWidth = if (isTablet) 170.dp else 130.dp
-    val imageHeight = if (isTablet) 240.dp else 185.dp
+    val cardHeight = if (isTablet) 325.dp else 255.dp
+    val imageHeight = if (isTablet) 245.dp else 190.dp
     val titleFontSize = if (isTablet) 14.sp else 12.sp
     val authorFontSize = if (isTablet) 12.sp else 10.sp
-    val buttonFontSize = if (isTablet) 12.sp else 10.sp
 
     Card(
-        modifier = Modifier.width(cardWidth),
+        modifier = Modifier
+            .width(cardWidth)
+            .height(cardHeight)
+            .clickable { onInceleClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
                 model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
                     .data(book.coverUrl)
@@ -139,23 +155,18 @@ fun BookCard(book: DashboardBook, onInceleClick: () -> Unit) {
                     .fillMaxWidth()
                     .height(imageHeight)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-                    .background(Color.LightGray)
+                    .background(Color.White)
             )
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(book.title, fontWeight = FontWeight.Bold, fontSize = titleFontSize, color = Color(0xFF1E293B), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(book.author, fontSize = authorFontSize, color = Color.Gray, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFFF26122))
-                        .clickable { onInceleClick() }
-                        .padding(vertical = if (isTablet) 6.dp else 4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("İncele", color = Color.White, fontSize = buttonFontSize, fontWeight = FontWeight.Bold)
-                }
             }
         }
     }
@@ -176,10 +187,18 @@ fun EtkinlikTakvimi(events: List<DashboardEvent>, onKatilClick: (String) -> Unit
             modifier = listModifier
         ) {
             chunkedEvents.forEach { rowEvents ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), 
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     rowEvents.forEach { event ->
-                        Box(modifier = Modifier.weight(1f)) {
-                            EventCard(event, onKatilClick, onDetayClick = { selectedEvent = event })
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                            EventCard(
+                                event, 
+                                onKatilClick, 
+                                onDetayClick = { selectedEvent = event },
+                                modifier = Modifier.fillMaxHeight()
+                            )
                         }
                     }
                     if (rowEvents.size == 1) {
@@ -203,22 +222,33 @@ fun EtkinlikTakvimi(events: List<DashboardEvent>, onKatilClick: (String) -> Unit
 }
 
 @Composable
-fun EventCard(event: DashboardEvent, onKatilClick: (String) -> Unit, onDetayClick: () -> Unit) {
+fun EventCard(
+    event: DashboardEvent, 
+    onKatilClick: (String) -> Unit, 
+    onDetayClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(1.dp),
         border = borderStroke(Color(0xFFE2E8F0))
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(imageVector = event.icon, contentDescription = null, tint = event.iconTint, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(event.title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFF1E293B), textAlign = TextAlign.Center)
-            Text(event.date, fontSize = 10.sp, color = Color.Gray)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(imageVector = event.icon, contentDescription = null, tint = event.iconTint, modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(event.title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFF1E293B), textAlign = TextAlign.Center)
+                Text(event.date, fontSize = 10.sp, color = Color.Gray)
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
