@@ -139,7 +139,15 @@ fun QuickAppsSection(
                     val isOkumaKulubu = titleLower.contains("okuma")
                     
                     if (app.actionType == ActionType.WEB_VIEW) {
-                        selectedApp = app
+                        try {
+                            val customTabsIntent = androidx.browser.customtabs.CustomTabsIntent.Builder()
+                                .setColorScheme(androidx.browser.customtabs.CustomTabsIntent.COLOR_SCHEME_LIGHT)
+                                .setShowTitle(true)
+                                .build()
+                            customTabsIntent.launchUrl(context, android.net.Uri.parse(app.actionData))
+                        } catch (e: Exception) {
+                            selectedApp = app
+                        }
                     } else if (app.title == "Kütüphanem") {
                         showLibrary = true
                     } else if (isZekii) {

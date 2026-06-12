@@ -94,11 +94,22 @@ fun FullScreenWebViewDialog(
                             settings.loadWithOverviewMode = true
                             settings.builtInZoomControls = true
                             settings.displayZoomControls = false
-
                             webViewClient = object : WebViewClient() {
                                 override fun onPageFinished(view: WebView?, url: String?) {
                                     super.onPageFinished(view, url)
                                     isLoading.value = false
+                                    // Inject CSS to fix landscape/small screen overflow cut-off
+                                    view?.evaluateJavascript(
+                                        """
+                                        (function() {
+                                            var style = document.createElement('style');
+                                            style.type = 'text/css';
+                                            style.innerHTML = 'html { height: 100% !important; overflow: hidden !important; } body { height: auto !important; min-height: 100% !important; overflow: auto !important; }';
+                                            document.head.appendChild(style);
+                                        })()
+                                        """.trimIndent(),
+                                        null
+                                    )
                                 }
 
                                 override fun onReceivedError(
