@@ -162,7 +162,7 @@ fun SuperAppToolbar(
                                 decorationBox = { innerTextField ->
                                     if (searchQuery.isEmpty()) {
                                         Text(
-                                            text = "Ara...",
+                                            text = "Kitap Ara...",
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.Light,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -192,7 +192,7 @@ fun SuperAppToolbar(
                         } else {
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Arama",
+                                text = "Kitap Ara",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Light,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
