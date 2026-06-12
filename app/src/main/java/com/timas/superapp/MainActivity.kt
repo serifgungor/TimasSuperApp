@@ -70,6 +70,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Surface(
                                 modifier = Modifier
+                                    .widthIn(max = 420.dp)
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp)
                                     .wrapContentHeight(),

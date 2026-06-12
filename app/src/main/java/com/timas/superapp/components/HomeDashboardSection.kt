@@ -66,9 +66,9 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Box(modifier = Modifier.weight(1f)) { YeniGelenler(books) }
+            Box(modifier = Modifier.weight(1.4f)) { YeniGelenler(books) }
             Box(modifier = Modifier.weight(1f).height(295.dp)) { 
                 EtkinlikTakvimi(
                     events = events, 
