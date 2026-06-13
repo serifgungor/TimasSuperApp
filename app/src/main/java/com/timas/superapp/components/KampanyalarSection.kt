@@ -53,7 +53,7 @@ fun KampanyalarSection() {
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.height(260.dp) // 2 satır banner + boşluklar için uygun yükseklik
+            modifier = Modifier.height(340.dp) // Increased height to make campaigns larger
         ) {
             items(kampanyalar) { kampanya ->
                 KampanyaCard(kampanya = kampanya)
@@ -66,7 +66,7 @@ fun KampanyalarSection() {
 fun KampanyaCard(kampanya: KampanyaItem) {
     Box(
         modifier = Modifier
-            .width(260.dp) // Resimdeki gibi geniş bir dikdörtgen form
+            .width(400.dp) // Adjusted to 400dp to fit the native banner aspect ratio (approx 2.4:1)
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFFF1F5F9))
             .clickable { /* Kampanyaya git */ },
