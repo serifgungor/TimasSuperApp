@@ -617,6 +617,8 @@ fun Library3DScreen() {
 
         // A. Book Details Dialog Overlay (For owned books)
         if (selectedBook != null) {
+            val configuration = LocalConfiguration.current
+            val dialogWidth = if (configuration.screenWidthDp >= 600) 0.5f else 0.95f
             Dialog(
                 onDismissRequest = { selectedBook = null },
                 properties = DialogProperties(
@@ -624,18 +626,27 @@ fun Library3DScreen() {
                     decorFitsSystemWindows = true
                 )
             ) {
-                com.timas.superapp.screens.BookDetailScreen(
-                    book = selectedBook!!,
-                    onBack = { selectedBook = null },
-                    onStartReading = { book ->
-                        selectedBook = null
-                        activeEBookReader = book
-                    },
-                    onStartListening = { book ->
-                        selectedBook = null
-                        activeAudioPlayer = book
-                    }
-                )
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(dialogWidth)
+                        .fillMaxHeight(0.85f)
+                        .clip(RoundedCornerShape(24.dp)),
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF120C0A)
+                ) {
+                    com.timas.superapp.screens.BookDetailScreen(
+                        book = selectedBook!!,
+                        onBack = { selectedBook = null },
+                        onStartReading = { book ->
+                            selectedBook = null
+                            activeEBookReader = book
+                        },
+                        onStartListening = { book ->
+                            selectedBook = null
+                            activeAudioPlayer = book
+                        }
+                    )
+                }
             }
         }
 

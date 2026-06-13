@@ -1,5 +1,8 @@
 package com.timas.superapp.components
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -265,64 +268,37 @@ fun borderStroke(color: Color) = androidx.compose.foundation.BorderStroke(1.dp, 
 
 @Composable
 fun BookDetailDialog(book: DashboardBook, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val dialogWidth = if (configuration.screenWidthDp >= 600) 0.5f else 0.95f
+    
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = true
+        )
+    ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = Color.White,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth(dialogWidth)
+                .fillMaxHeight(0.85f)
+                .clip(RoundedCornerShape(24.dp)),
+            shape = RoundedCornerShape(24.dp),
+            color = Color.White
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                AsyncImage(
-                    model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
-                        .data(book.coverUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = book.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = book.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color(0xFF1E293B),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = book.author,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    color = Color(0xFFF26122),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = book.description,
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF26122)),
-                    shape = RoundedCornerShape(24.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .height(48.dp)
-                ) {
-                    Text("Kapat", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                }
-            }
+            com.timas.superapp.screens.BookDetailScreen(
+                book = com.timas.superapp.Book(
+                    title = book.title,
+                    author = book.author,
+                    coverUrl = book.coverUrl,
+                    description = book.description,
+                    isOwned = true
+                ),
+                onBack = onDismiss,
+                onStartReading = { onDismiss() },
+                onStartListening = { onDismiss() },
+                isLightMode = true
+            )
         }
     }
 }

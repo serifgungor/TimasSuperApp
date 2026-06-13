@@ -62,8 +62,16 @@ fun BookDetailScreen(
     book: Book,
     onBack: () -> Unit,
     onStartReading: (Book) -> Unit = {},
-    onStartListening: (Book) -> Unit = {}
+    onStartListening: (Book) -> Unit = {},
+    isLightMode: Boolean = false
 ) {
+    val bgColor = if (isLightMode) Color(0xFFF8FAFC) else Color(0xFF0F172A)
+    val surfaceColor = if (isLightMode) Color(0xFFFFF0E5) else Color(0xFF261D1A)
+    val textColor = if (isLightMode) Color(0xFF1E293B) else Color.White
+    val cardBgColor = if (isLightMode) Color(0xFFFFF0E5) else Color(0xFF261D1A)
+    val subtitleColor = if (isLightMode) Color(0xFF64748B) else Color(0xFF94A3B8)
+    val topBarColor = if (isLightMode) Color(0xFFFFF0E5) else Color(0xFF261D1A)
+
     val context = LocalContext.current
     
     // We bind local book state so users can click similar books and update the view dynamically
@@ -117,125 +125,130 @@ fun BookDetailScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Kitap Detayı",
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                        fontSize = 17.sp
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF261D1A))
-            )
-        },
-        containerColor = Color(0xFF120C0A) // Matching dark premium theme
+        containerColor = bgColor // Matching dark premium theme
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            // 1. OVERVIEW ROW (COVER & BASIC INFO)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            // 1. HERO IMAGE (COVER & BASIC INFO)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
             ) {
-                // Book Cover Container
+                SubcomposeAsyncImage(
+                    model = currentBook.coverUrl,
+                    contentDescription = currentBook.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    loading = { LocalCoverFallback(book = currentBook) },
+                    error = { LocalCoverFallback(book = currentBook) }
+                )
+                // Gradient overlay
                 Box(
                     modifier = Modifier
-                        .size(130.dp, 190.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .shadow(12.dp, RoundedCornerShape(16.dp))
-                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                        .fillMaxSize()
+                        .background(
+                            androidx.compose.ui.graphics.Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)),
+                                startY = 200f
+                            )
+                        )
+                )
+
+                // Back button
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .background(Color.Black.copy(alpha = 0.4f), androidx.compose.foundation.shape.CircleShape)
                 ) {
-                    SubcomposeAsyncImage(
-                        model = currentBook.coverUrl,
-                        contentDescription = currentBook.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        loading = { LocalCoverFallback(book = currentBook) },
-                        error = { LocalCoverFallback(book = currentBook) }
-                    )
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri", tint = Color.White)
                 }
 
-                Spacer(modifier = Modifier.width(20.dp))
-
-                // Metadata details
-                Column(modifier = Modifier.weight(1f)) {
+                // Metadata details over image
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(20.dp)
+                ) {
                     // Type Badge
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFFF9F43).copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .background(Color(0xFFFF9F43).copy(alpha = 0.85f))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = currentBook.type,
-                            color = Color(0xFFFF9F43),
-                            fontSize = 10.sp,
+                            color = Color.White,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
                         text = currentBook.title,
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White,
                         fontFamily = FontFamily.Serif,
-                        lineHeight = 26.sp
+                        lineHeight = 30.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
                         text = currentBook.author,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF94A3B8)
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     // Rating stars
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB900), modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB900), modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "${stats.rating} / 5.0",
                             color = Color.White,
-                            fontSize = 12.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "(140 Yorum)",
-                            color = Color(0xFF64748B),
-                            fontSize = 11.sp
+                            color = textColor,
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Rest of the content
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 24.dp)
+            ) {
 
             // 2. DETAILED METADATA GRID PANEL (Pages, Format, Year, Lang)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
-                    .background(Color(0xFF261D1A))
+                    .background(surfaceColor)
                     .padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -243,24 +256,32 @@ fun BookDetailScreen(
                     label = "Sayfa",
                     value = "${stats.pages} s.",
                     icon = Icons.Default.Description,
+                    textColor = textColor,
+                    subtitleColor = subtitleColor,
                     modifier = Modifier.weight(1f)
                 )
                 DetailTileItem(
                     label = "Süre",
                     value = stats.audioDuration,
                     icon = Icons.Default.Headphones,
+                    textColor = textColor,
+                    subtitleColor = subtitleColor,
                     modifier = Modifier.weight(1f)
                 )
                 DetailTileItem(
                     label = "Yıl",
                     value = stats.year,
                     icon = Icons.Default.CalendarToday,
+                    textColor = textColor,
+                    subtitleColor = subtitleColor,
                     modifier = Modifier.weight(1f)
                 )
                 DetailTileItem(
                     label = "Dil",
                     value = "Türkçe",
                     icon = Icons.Default.Language,
+                    textColor = textColor,
+                    subtitleColor = subtitleColor,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -311,14 +332,14 @@ fun BookDetailScreen(
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = null,
-                        tint = Color(0xFF18100C),
+                        tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Sesli Dinle",
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF18100C),
+                        color = Color.White,
                         fontSize = 11.sp
                     )
                 }
@@ -336,7 +357,7 @@ fun BookDetailScreen(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF332520))
+                        .background(surfaceColor)
                 ) {
                     val heartScale by animateFloatAsState(
                         targetValue = if (isLiked) 1.25f else 1.0f,
@@ -346,7 +367,7 @@ fun BookDetailScreen(
                     Icon(
                         imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Beğen",
-                        tint = if (isLiked) Color(0xFFEF4444) else Color.White,
+                        tint = if (isLiked) Color(0xFFEF4444) else textColor,
                         modifier = Modifier.graphicsLayer(scaleX = heartScale, scaleY = heartScale)
                     )
                 }
@@ -382,7 +403,7 @@ fun BookDetailScreen(
                                 text = label,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSelected) Color.White else Color(0xFF64748B)
+                                color = textColor
                             )
                         }
                     )
@@ -403,7 +424,7 @@ fun BookDetailScreen(
                             Text(
                                 text = currentBook.description.ifEmpty { "Bu kitap için detaylı bir açıklama bulunmamaktadır." },
                                 fontSize = 13.sp,
-                                color = Color(0xFFCBD5E1),
+                                color = textColor,
                                 lineHeight = 20.sp,
                                 textAlign = TextAlign.Justify
                             )
@@ -420,7 +441,7 @@ fun BookDetailScreen(
                         Text(
                             text = preface,
                             fontSize = 13.sp,
-                            color = Color(0xFFCBD5E1),
+                            color = textColor,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                             lineHeight = 20.sp,
                             fontFamily = FontFamily.Serif
@@ -430,7 +451,7 @@ fun BookDetailScreen(
                         Text(
                             text = stats.authorBiography,
                             fontSize = 13.sp,
-                            color = Color(0xFFCBD5E1),
+                            color = textColor,
                             lineHeight = 20.sp
                         )
                     }
@@ -438,7 +459,7 @@ fun BookDetailScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             reviews.forEach { r ->
                                 Card(
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFF261D1A)),
+                                    colors = CardDefaults.cardColors(containerColor = cardBgColor),
                                     shape = RoundedCornerShape(12.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -447,11 +468,11 @@ fun BookDetailScreen(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            Text(text = r.user, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text(text = r.user, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textColor)
                                             Text(text = r.ratingStars, fontSize = 11.sp, color = Color(0xFFFFB900))
                                         }
                                         Spacer(modifier = Modifier.height(6.dp))
-                                        Text(text = r.comment, fontSize = 12.sp, color = Color(0xFFCBD5E1), lineHeight = 16.sp)
+                                        Text(text = r.comment, fontSize = 12.sp, color = textColor, lineHeight = 16.sp)
                                     }
                                 }
                             }
@@ -467,7 +488,7 @@ fun BookDetailScreen(
                 text = "Benzer Kitaplar",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = textColor,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
@@ -485,7 +506,7 @@ fun BookDetailScreen(
                                 selectedTabState = 0
                             },
                         shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF261D1A))
+                        colors = CardDefaults.cardColors(containerColor = cardBgColor)
                     ) {
                         Column(
                             modifier = Modifier.padding(8.dp),
@@ -511,7 +532,7 @@ fun BookDetailScreen(
                                 text = sBook.title,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White,
+                                color = textColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Center
@@ -530,6 +551,7 @@ fun BookDetailScreen(
             }
 
             Spacer(modifier = Modifier.height(48.dp))
+            }
         }
     }
 }
@@ -671,6 +693,8 @@ private fun DetailTileItem(
     label: String,
     value: String,
     icon: ImageVector,
+    textColor: Color,
+    subtitleColor: Color,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -681,6 +705,6 @@ private fun DetailTileItem(
         Spacer(modifier = Modifier.height(6.dp))
         Text(text = label, fontSize = 9.sp, color = Color(0xFF64748B))
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = value, fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = value, fontSize = 11.sp, color = textColor, fontWeight = FontWeight.Bold)
     }
 }
