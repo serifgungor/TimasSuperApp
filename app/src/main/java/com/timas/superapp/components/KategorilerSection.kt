@@ -38,6 +38,7 @@ data class KategoriItem(val name: String, val icon: String, val url: String)
 
 @Composable
 fun KategorilerSection() {
+    val context = LocalContext.current
     var activeCategoryUrl by remember { mutableStateOf<String?>(null) }
     var activeCategoryTitle by remember { mutableStateOf<String?>(null) }
 
@@ -85,8 +86,16 @@ fun KategorilerSection() {
                         .background(Color.White, CircleShape)
                         .clip(CircleShape)
                         .clickable {
-                            activeCategoryUrl = kategori.url
-                            activeCategoryTitle = kategori.name
+                            try {
+                                val customTabsIntent = androidx.browser.customtabs.CustomTabsIntent.Builder()
+                                    .setColorScheme(androidx.browser.customtabs.CustomTabsIntent.COLOR_SCHEME_LIGHT)
+                                    .setShowTitle(true)
+                                    .build()
+                                customTabsIntent.launchUrl(context, android.net.Uri.parse(kategori.url))
+                            } catch (e: Exception) {
+                                activeCategoryUrl = kategori.url
+                                activeCategoryTitle = kategori.name
+                            }
                         }
                         .padding(10.dp),
                     contentAlignment = Alignment.Center

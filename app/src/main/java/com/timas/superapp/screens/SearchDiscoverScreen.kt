@@ -40,11 +40,11 @@ data class DiscoverCategory(val name: String, val color: Color)
 fun SearchDiscoverScreen(searchQuery: String) {
     val discoverBooks = listOf(
         DiscoverBook("Kalpsizler", "Marissa Meyer", "https://cdn.timas.com.tr/urun/kalpsizler-9786050847642.jpg", "150 TL", "Roman"),
-        DiscoverBook("Beyaz Diş", "Jack London", "https://cdn.timas.com.tr/urun/beyaz-dis-9786050845341.jpg", "180 TL", "Klasik"),
+        DiscoverBook("Tavuk Bacaklı Ev Kaçıyor", "Sophie Anderson", "https://cdn.timas.com.tr/urun/tavuk-bacakli-ev-kaciyor-9786259232645.jpg", "160 TL", "Roman"),
         DiscoverBook("Mutluluğun İnşası", "Mecit Ömür Öztürk", "https://cdn.timas.com.tr/urun/mutlulugun-insasi-9786050849745.jpg", "90 TL", "Psikoloji"),
         DiscoverBook("Dilin Afetleri", "İmam Gazzâlî", "https://cdn.timas.com.tr/urun/dilin-afetleri-9786259445182.jpg", "120 TL", "İslam"),
         DiscoverBook("Kur'an Atlası", "Timaş Yayınları", "https://cdn.timas.com.tr/urun/kuran-atlasi-9786256360525.jpg", "110 TL", "İslam"),
-        DiscoverBook("Kelimeler Adası", "Timaş Çocuk", "https://cdn.timas.com.tr/urun/kelimeler-adasi-9786050849646.jpg", "60 TL", "Çocuk")
+        DiscoverBook("Ağaçların Fısıltısı", "Murat Moroğlu", "https://cdn.timas.com.tr/urun/agaclarin-fisiltisi-9786258618112.jpg", "95 TL", "Çocuk")
     )
 
     val discoverCategories = listOf(

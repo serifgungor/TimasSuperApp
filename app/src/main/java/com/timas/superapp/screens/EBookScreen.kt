@@ -218,6 +218,9 @@ fun EBookScreen(
     // Telefonlarda okuyucuyu tam ekran gösterme flag'i
     var showMobileReaderScreen by remember { mutableStateOf(false) }
 
+    val listScrollState = rememberScrollState()
+
+
     // Ekran Boyutu Tespiti
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
@@ -285,7 +288,7 @@ fun EBookScreen(
                     Column(
                         modifier = Modifier
                             .weight(4f)
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(listScrollState)
                     ) {
                         EBookListSections(
                             purchasedBooks = purchasedBooks,
@@ -415,7 +418,7 @@ fun EBookScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .verticalScroll(rememberScrollState())
+                                    .verticalScroll(listScrollState)
                             ) {
                                 EBookListSections(
                                     purchasedBooks = purchasedBooks,

@@ -190,7 +190,7 @@ fun QuickAppsSection(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFE9E1D6))
+                    .background(Color(0xFF18100C))
                     .systemBarsPadding()
             ) {
                 // Üst bar - geri git butonu
@@ -198,7 +198,7 @@ fun QuickAppsSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .background(Color(0xFFE9E1D6))
+                        .background(Color(0xFF261D1A))
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -208,18 +208,18 @@ fun QuickAppsSection(
                         modifier = Modifier
                             .size(28.dp)
                             .clickable { showLibrary = false },
-                        tint = Color(0xFF3B2A1A)
+                        tint = Color(0xFFFF9F43)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "📚 Kütüphane",
+                        text = "📚 Okuma Kozası",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3B2A1A)
+                        color = Color(0xFFF1F5F9)
                     )
                 }
-                // Ayırıcı çizgi
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFCBBDA7)))
+                // İnce modern ayırıcı çizgi
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF1E293B)))
                 // Library ekranı
                 Box(modifier = Modifier.weight(1f)) {
                     Library3DScreen()

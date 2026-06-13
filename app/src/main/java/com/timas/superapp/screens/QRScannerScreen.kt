@@ -16,6 +16,11 @@ import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.animation.core.*
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,64 +59,101 @@ fun QrScannerScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color(0xFF1E293B)) // Premium dark slate background
     ) {
         when {
             cameraPermissionState.status.isGranted -> {
-                // Kamera açık — QR tarama aktif
-                QrCameraPreview(
-                    onQrScanned = { result ->
-                        onQrScanned(result)
-                        onBack()
-                    }
+                val infiniteTransition = rememberInfiniteTransition(label = "laser_transition")
+                val laserPositionY by infiniteTransition.animateFloat(
+                    initialValue = 0.1f,
+                    targetValue = 0.9f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "laser_y"
                 )
 
-                // Üst bar
-                Row(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Geri",
-                            tint = Color.White
+                    // 1. Üst bar
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "QR Kodu Tarat",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        IconButton(
+                            onClick = onBack,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Kapat",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
-                    Text(
-                        text = "QR Kodu Tarat",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
 
-                // Orta — tarama çerçevesi
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // 2. Kamera Viewport Kutusu (Kenarları yumuşatılmış)
+                    Box(
+                        modifier = Modifier
+                            .size(220.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .border(2.dp, Color(0xFFF26122), RoundedCornerShape(24.dp))
+                            .background(Color.Black),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        QrCameraPreview(
+                            onQrScanned = { result ->
+                                onQrScanned(result)
+                                onBack()
+                            }
+                        )
+
+                        // Hareketli Lazer Animasyonu
                         Box(
                             modifier = Modifier
-                                .size(260.dp)
-                                .border(
-                                    width = 3.dp,
-                                    color = Color(0xFFF26122),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = "QR kodu çerçeve içine getirin",
-                            color = Color.White.copy(alpha = 0.85f),
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center
+                                .fillMaxSize()
+                                .drawWithContent {
+                                    drawContent()
+                                    val y = size.height * laserPositionY
+                                    drawLine(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color(0xFFF26122),
+                                                Color(0xFFF26122),
+                                                Color.Transparent
+                                            )
+                                        ),
+                                        start = Offset(10f, y),
+                                        end = Offset(size.width - 10f, y),
+                                        strokeWidth = 3.dp.toPx()
+                                    )
+                                }
                         )
                     }
+
+                    // 3. Alt Açıklama Yazısı
+                    Text(
+                        text = "QR kodu çerçeve içine ortalayarak taratın",
+                        color = Color.White.copy(alpha = 0.6f),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
                 }
             }
 
@@ -142,7 +184,9 @@ private fun QrCameraPreview(onQrScanned: (String) -> Unit) {
 
     AndroidView(
         factory = { ctx ->
-            val previewView = PreviewView(ctx)
+            val previewView = PreviewView(ctx).apply {
+                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            }
             val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
             val executor = Executors.newSingleThreadExecutor()
 

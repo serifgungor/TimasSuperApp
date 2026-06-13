@@ -98,18 +98,20 @@ fun FullScreenWebViewDialog(
                                 override fun onPageFinished(view: WebView?, url: String?) {
                                     super.onPageFinished(view, url)
                                     isLoading.value = false
-                                    // Inject CSS to fix landscape/small screen overflow cut-off
-                                    view?.evaluateJavascript(
-                                        """
-                                        (function() {
-                                            var style = document.createElement('style');
-                                            style.type = 'text/css';
-                                            style.innerHTML = 'html { height: 100% !important; overflow: hidden !important; } body { height: auto !important; min-height: 100% !important; overflow: auto !important; }';
-                                            document.head.appendChild(style);
-                                        })()
-                                        """.trimIndent(),
-                                        null
-                                    )
+                                    // Only inject landscape/small screen overflow CSS fix for Timaş Portal
+                                    if (url?.contains("portal.timas.com.tr") == true) {
+                                        view?.evaluateJavascript(
+                                            """
+                                            (function() {
+                                                var style = document.createElement('style');
+                                                style.type = 'text/css';
+                                                style.innerHTML = 'html { height: 100% !important; overflow: hidden !important; } body { height: auto !important; min-height: 100% !important; overflow: auto !important; }';
+                                                document.head.appendChild(style);
+                                            })()
+                                            """.trimIndent(),
+                                            null
+                                        )
+                                    }
                                 }
 
                                 override fun onReceivedError(

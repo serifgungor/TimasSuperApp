@@ -118,20 +118,21 @@ fun ZekiiScreen(
             messages.removeAll { it.id == typingId }
 
             // Cevabı belirle
-            val botText = when (userMsg.trim().lowercase()) {
-                "ilham arıyorum" -> {
+            val msg = userMsg.trim().lowercase()
+            val botText = when {
+                msg.contains("ilham") -> {
                     "“İlham arıyorum” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: Düşünme Gücü\nYazar: Ahmet Şerif İzgören"
                 }
-                "stresliyim" -> {
+                msg.contains("stres") -> {
                     "“Stresliyim” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: İnsan İnsana\nYazar: Doğan Cüceloğlu"
                 }
-                "sıkıldım" -> {
-                    "“Sıkıldım” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: Beyaz Diş\nYazar: Jack London"
+                msg.contains("sıkıl") || msg.contains("sikil") || msg.contains("sıkıldım") -> {
+                    "“Sıkıldım” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: Tavuk Bacaklı Ev Kaçıyor\nYazar: Sophie Anderson"
                 }
-                "mutluyum" -> {
+                msg.contains("mutlu") -> {
                     "“Mutluyum” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: Küçük Prens\nYazar: Antoine de Saint-Exupéry"
                 }
-                "yeni bir şey öğrenmek istiyorum" -> {
+                msg.contains("öğren") || msg.contains("ogren") || msg.contains("öğrenmek") || msg.contains("yeni bir") -> {
                     "“Yeni bir şey öğrenmek istiyorum” moduna uygun harika bir kitap buldum! 📚\n\n📖 Önerim: Sapiens\nYazar: Yuval Noah Harari"
                 }
                 else -> {

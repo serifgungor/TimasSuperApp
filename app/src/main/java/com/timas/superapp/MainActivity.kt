@@ -16,6 +16,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.*
@@ -37,9 +39,10 @@ import com.timas.superapp.screens.ZekiiScreen
 import com.timas.superapp.screens.SesliKitapScreen
 import com.timas.superapp.screens.EBookScreen
 import com.timas.superapp.screens.OkumaKulubuScreen
+import com.timas.superapp.screens.WebViewScreen
 import com.timas.superapp.ui.theme.TimasTheme
 
-private enum class AppScreen { HOME, LOGIN, QR_SCANNER, ZEKII, SESLI_KITAP, E_BOOK, OKUMA_KULUBU }
+private enum class AppScreen { HOME, LOGIN, ZEKII, SESLI_KITAP, E_BOOK, OKUMA_KULUBU, WEB_VIEW }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +57,7 @@ class MainActivity : ComponentActivity() {
                     SplashScreen(onSplashFinished = { showSplash = false })
                 } else {
                     var showLoginSheet by remember { mutableStateOf(false) }
+                    var showQrDialog by remember { mutableStateOf(false) }
                     var scannedQrResult by remember { mutableStateOf<String?>(null) }
                     var searchQuery by remember { mutableStateOf("") }
                     var selectedBottomTab by remember { mutableStateOf(0) }
@@ -61,6 +65,9 @@ class MainActivity : ComponentActivity() {
                     
                     val snackbarHostState = remember { SnackbarHostState() }
                     val coroutineScope = rememberCoroutineScope()
+                    val homeScrollState = rememberScrollState()
+                    var webViewUrl by remember { mutableStateOf("") }
+                    var webViewTitle by remember { mutableStateOf("") }
 
                     if (showLoginSheet) {
                         Dialog(
@@ -97,96 +104,151 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    when (currentScreen) {
-                        AppScreen.ZEKII -> {
-                            ZekiiScreen(onBack = { currentScreen = AppScreen.HOME })
+                    if (showQrDialog) {
+                        Dialog(
+                            onDismissRequest = { showQrDialog = false },
+                            properties = DialogProperties(usePlatformDefaultWidth = false)
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .width(320.dp)
+                                    .height(380.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .border(2.dp, Color(0xFFF26122), RoundedCornerShape(24.dp)),
+                                shape = RoundedCornerShape(24.dp),
+                                color = Color.Black
+                            ) {
+                                QrScannerScreen(
+                                    onBack = { showQrDialog = false },
+                                    onQrScanned = { result ->
+                                        scannedQrResult = result
+                                        showQrDialog = false
+                                    }
+                                )
+                            }
                         }
- 
-                        AppScreen.SESLI_KITAP -> {
-                            SesliKitapScreen(onBack = { currentScreen = AppScreen.HOME })
-                        }
- 
-                        AppScreen.E_BOOK -> {
-                            EBookScreen(onBack = { currentScreen = AppScreen.HOME })
-                        }
-                        
-                        AppScreen.OKUMA_KULUBU -> {
-                            OkumaKulubuScreen(onBack = { currentScreen = AppScreen.HOME })
-                        }
+                    }
 
-                        AppScreen.LOGIN -> {
-                            // LoginScreen is now a ModalBottomSheet
-                            currentScreen = AppScreen.HOME
-                        }
 
-                        AppScreen.QR_SCANNER -> {
-                            QrScannerScreen(
-                                onBack = { currentScreen = AppScreen.HOME },
-                                onQrScanned = { result ->
-                                    scannedQrResult = result
+                    Scaffold(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures(onTap = { focusManager.clearFocus() })
+                            },
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
+                        bottomBar = {
+                            SuperAppBottomNav(
+                                selectedIndex = if (currentScreen == AppScreen.HOME) selectedBottomTab else -1,
+                                onTabSelected = { 
+                                    selectedBottomTab = it
                                     currentScreen = AppScreen.HOME
-                                }
+                                },
+                                onHomeClick = {
+                                    selectedBottomTab = 0
+                                    currentScreen = AppScreen.HOME
+                                },
+                                onSearchClick = {
+                                    selectedBottomTab = 1
+                                    currentScreen = AppScreen.HOME
+                                },
+                                onCartClick = {
+                                    selectedBottomTab = 2
+                                    currentScreen = AppScreen.HOME
+                                },
+                                onMenuClick = {
+                                    selectedBottomTab = 3
+                                    currentScreen = AppScreen.HOME
+                                },
+                                onQrClick = { showQrDialog = true }
                             )
                         }
+                    ) { innerPadding ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                        ) {
+                            when (currentScreen) {
+                                AppScreen.ZEKII -> {
+                                    ZekiiScreen(onBack = { currentScreen = AppScreen.HOME })
+                                }
+         
+                                AppScreen.SESLI_KITAP -> {
+                                    SesliKitapScreen(onBack = { currentScreen = AppScreen.HOME })
+                                }
+         
+                                AppScreen.E_BOOK -> {
+                                    EBookScreen(onBack = { currentScreen = AppScreen.HOME })
+                                }
+                                
+                                AppScreen.OKUMA_KULUBU -> {
+                                    OkumaKulubuScreen(onBack = { currentScreen = AppScreen.HOME })
+                                }
 
-                        AppScreen.HOME -> {
-                            Scaffold(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(onTap = { focusManager.clearFocus() })
-                                    },
-                                snackbarHost = { SnackbarHost(snackbarHostState) },
-                                topBar = {
-                                    SuperAppToolbar(
-                                        searchQuery = searchQuery,
-                                        onSearchQueryChange = { searchQuery = it },
-                                        onProfileClick = { showLoginSheet = true }
-                                    )
-                                },
-                                bottomBar = {
-                                    SuperAppBottomNav(
-                                        selectedIndex = selectedBottomTab,
-                                        onTabSelected = { selectedBottomTab = it },
-                                        onQrClick = { currentScreen = AppScreen.QR_SCANNER }
+                                AppScreen.WEB_VIEW -> {
+                                    WebViewScreen(
+                                        title = webViewTitle,
+                                        url = webViewUrl,
+                                        onBack = { currentScreen = AppScreen.HOME }
                                     )
                                 }
-                            ) { innerPadding ->
-                                if (selectedBottomTab == 1) {
-                                    Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-                                        com.timas.superapp.screens.SearchDiscoverScreen(searchQuery = searchQuery)
-                                    }
-                                } else {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(innerPadding)
-                                            .verticalScroll(rememberScrollState())
-                                    ) {
-                                        SuperAppSlider()
-                                        com.timas.superapp.components.KategorilerSection()
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        com.timas.superapp.components.HomeDashboardSection(
-                                            onKatilClick = { eventTitle ->
-                                                coroutineScope.launch {
-                                                    snackbarHostState.showSnackbar("$eventTitle etkinliğine katılım talebiniz alındı.")
-                                                }
+        
+                                AppScreen.LOGIN -> {
+                                    // LoginScreen is now a ModalBottomSheet
+                                    currentScreen = AppScreen.HOME
+                                }
+        
+
+        
+                                AppScreen.HOME -> {
+                                    Scaffold(
+                                        modifier = Modifier.fillMaxSize(),
+                                        topBar = {
+                                            SuperAppToolbar(
+                                                searchQuery = searchQuery,
+                                                onSearchQueryChange = { searchQuery = it },
+                                                onProfileClick = { showLoginSheet = true }
+                                            )
+                                        }
+                                    ) { homePadding ->
+                                        if (selectedBottomTab == 1) {
+                                            Box(modifier = Modifier.padding(homePadding).fillMaxSize()) {
+                                                com.timas.superapp.screens.SearchDiscoverScreen(searchQuery = searchQuery)
                                             }
-                                        )
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        QuickAppsSection(
-                                            onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
-                                            onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
-                                            onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
-                                            onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU }
-                                        )
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        com.timas.superapp.components.GamesAndTvSection()
-                                        
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        com.timas.superapp.components.KampanyalarSection()
-                                        
-                                        Spacer(modifier = Modifier.height(32.dp))
+                                        } else {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(homePadding)
+                                                    .verticalScroll(homeScrollState)
+                                            ) {
+                                                SuperAppSlider()
+                                                com.timas.superapp.components.KategorilerSection()
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                com.timas.superapp.components.HomeDashboardSection(
+                                                    onKatilClick = { eventTitle ->
+                                                        coroutineScope.launch {
+                                                            snackbarHostState.showSnackbar("$eventTitle etkinliğine katılım talebiniz alındı.")
+                                                        }
+                                                    }
+                                                )
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                QuickAppsSection(
+                                                    onNavigateToZekii = { currentScreen = AppScreen.ZEKII },
+                                                    onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP },
+                                                    onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
+                                                    onNavigateToOkumaKulubu = { currentScreen = AppScreen.OKUMA_KULUBU }
+                                                )
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                com.timas.superapp.components.GamesAndTvSection()
+                                                
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                com.timas.superapp.components.KampanyalarSection()
+                                                
+                                                Spacer(modifier = Modifier.height(32.dp))
+                                            }
+                                        }
                                     }
                                 }
                             }

@@ -147,6 +147,9 @@ fun SesliKitapScreen(
     // Telefonlarda oynatıcı ekranını tam ekran gösterme flag'i
     var showMobilePlayerScreen by remember { mutableStateOf(false) }
 
+    val listScrollState = rememberScrollState()
+
+
     // Oynatma süresi simülasyonu (250ms periyotlu akıcı ve sorunsuz ilerleme)
     LaunchedEffect(isPlaying, playbackSpeed, selectedBook) {
         if (isPlaying) {
@@ -230,7 +233,7 @@ fun SesliKitapScreen(
                     Column(
                         modifier = Modifier
                             .weight(4f)
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(listScrollState)
                     ) {
                         BookListSections(
                             purchasedBooks = purchasedBooks,
@@ -338,7 +341,7 @@ fun SesliKitapScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .verticalScroll(rememberScrollState())
+                                    .verticalScroll(listScrollState)
                             ) {
                                 BookListSections(
                                     purchasedBooks = purchasedBooks,
