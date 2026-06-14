@@ -2,6 +2,7 @@ package com.timas.superapp.screens
 
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,8 +31,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.timas.superapp.Book
+import com.timas.superapp.LibraryDatabase
 
 // ─── Renk Paleti ─────────────────────────────────────────────
 private val Orange       = Color(0xFFF26122)
@@ -45,18 +50,6 @@ private val TextMuted    = Color(0xFF64748B)
 private val BorderClr    = Color(0xFFE2E8F0)
 private val PlayerCardBg = Color(0xFFF1F5F9)
 
-// ─── Veri Sınıfı ─────────────────────────────────────────────
-data class Audiobook(
-    val id: String,
-    val title: String,
-    val author: String,
-    val narrator: String,
-    val duration: String,
-    val coverUrl: String,
-    val description: String,
-    val totalSeconds: Int
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SesliKitapScreen(
@@ -65,81 +58,15 @@ fun SesliKitapScreen(
 ) {
     val context = LocalContext.current
     
-    // Kitap Listeleri
-    val purchasedBooks = remember {
-        listOf(
-            Audiobook(
-                id = "p1",
-                title = "Mutluluğun İnşası",
-                author = "Mecit Ömür Öztürk",
-                narrator = "Ufuk Bayraktar",
-                duration = "4 sa 32 dk",
-                totalSeconds = 16320,
-                coverUrl = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300",
-                description = "Mutluluk bir durum değil, bir yolculuktur. Bu sesli kitapta, iç huzuru bulmanın ve gerçek mutluluğu inşa etmenin adımlarını dinleyeceksiniz. Her bölüm, pratik egzersizler ve düşünce provokasyonları ile desteklenmiştir."
-            ),
-            Audiobook(
-                id = "p2",
-                title = "Dilin Afetleri",
-                author = "İmam Gazali",
-                narrator = "Sinan Bengier",
-                duration = "3 sa 15 dk",
-                totalSeconds = 11700,
-                coverUrl = "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=300",
-                description = "İnsanın en büyük imtihanlarından biri olan dilin, ahlak ve maneviyat üzerindeki etkilerini anlatan klasik bir eser. Gıybet, yalan ve boş konuşma gibi dilin afetlerinden korunma yolları akıcı bir üslupla sunuluyor."
-            ),
-            Audiobook(
-                id = "p3",
-                title = "Kur'an Atlası",
-                author = "Timaş Yayınları",
-                narrator = "Seda Yücel",
-                duration = "6 sa 10 dk",
-                totalSeconds = 22200,
-                coverUrl = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=300",
-                description = "Kur'an-ı Kerim'de adı geçen coğrafi mekanların, kavimlerin ve olayların tarihi ve arkeolojik bilgilerle açıklandığı kapsamlı bir rehber eser."
-            )
-        )
-    }
-
-    val sampleBooks = remember {
-        listOf(
-            Audiobook(
-                id = "s1",
-                title = "Kalpsizler",
-                author = "Timaş Yayınları",
-                narrator = "Cem Yılmaz",
-                duration = "5 sa 45 dk",
-                totalSeconds = 20700,
-                coverUrl = "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=300",
-                description = "Kalpsizlerin dünyasında insanlık sorgulanıyor. Distopik bir gelecekte, duygulardan arındırılmış bir toplumda var olma mücadelesi veren gençlerin hikayesi."
-            ),
-            Audiobook(
-                id = "s2",
-                title = "Politik Bir Beden",
-                author = "Timaş Yayınları",
-                narrator = "Ayşe Kulin",
-                duration = "4 sa 20 dk",
-                totalSeconds = 15600,
-                coverUrl = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300",
-                description = "Toplumsal cinsiyet ve siyaset üzerine modern bir analiz. Bedenin politikleşmesi, iktidar ilişkileri ve bireysel özgürlüklerin sınırları tartışılıyor."
-            ),
-            Audiobook(
-                id = "s3",
-                title = "Od",
-                author = "İskender Pala",
-                narrator = "Haluk Bilginer",
-                duration = "7 sa 05 dk",
-                totalSeconds = 25500,
-                coverUrl = "https://images.unsplash.com/photo-1474932430478-367dbb6832c1?auto=format&fit=crop&q=80&w=300",
-                description = "Yunus Emre'nin hayatından kesitler sunan, tasavvufi derinliği ve şiirsel anlatımıyla dinleyiciyi büyüleyen tarihi bir roman."
-            )
-        )
-    }
+    // Global kütüphane veritabanından dinamik olarak sesli kitap verilerini çekiyoruz
+    val libraryBooks = LibraryDatabase.books
+    val purchasedBooks = libraryBooks.filter { it.isOwned }
+    val sampleBooks = libraryBooks.filter { !it.isOwned }
 
     // Durum Yönetimi
-    var selectedBook by remember { mutableStateOf(purchasedBooks[0]) }
+    var selectedBook by remember { mutableStateOf(purchasedBooks.firstOrNull() ?: libraryBooks[0]) }
     var isPlaying by remember { mutableStateOf(false) }
-    var currentPositionSeconds by remember { mutableStateOf(0f) }
+    var currentPositionSeconds by remember(selectedBook.title) { mutableStateOf(selectedBook.audioPositionSeconds) }
     var playbackSpeed by remember { mutableStateOf(1.0f) }
     var isMuted by remember { mutableStateOf(false) }
     var currentVolume by remember { mutableStateOf(0.8f) }
@@ -149,6 +76,18 @@ fun SesliKitapScreen(
 
     val listScrollState = rememberScrollState()
 
+    // Oynatma ilerleme verisini global veritabanına yazarak diğer ekranlar (örn. 3D Kütüphane) ile senkronize ediyoruz
+    val updateAudioProgress: (String, Float) -> Unit = { title, position ->
+        val idx = LibraryDatabase.books.indexOfFirst { it.title == title }
+        if (idx != -1) {
+            val book = LibraryDatabase.books[idx]
+            val progressPercent = ((position / book.totalSeconds) * 100).toInt().coerceIn(0, 100)
+            LibraryDatabase.books[idx] = book.copy(
+                audioPositionSeconds = position,
+                progress = progressPercent
+            )
+        }
+    }
 
     // Oynatma süresi simülasyonu (250ms periyotlu akıcı ve sorunsuz ilerleme)
     LaunchedEffect(isPlaying, playbackSpeed, selectedBook) {
@@ -159,6 +98,7 @@ fun SesliKitapScreen(
                     selectedBook.totalSeconds.toFloat(),
                     currentPositionSeconds + (0.25f * playbackSpeed)
                 )
+                updateAudioProgress(selectedBook.title, currentPositionSeconds)
             }
             if (currentPositionSeconds >= selectedBook.totalSeconds) {
                 isPlaying = false
@@ -238,15 +178,12 @@ fun SesliKitapScreen(
                         BookListSections(
                             purchasedBooks = purchasedBooks,
                             sampleBooks = sampleBooks,
-                            activeBookId = selectedBook.id,
-                            onPlayBook = { book, isSample ->
+                            activeBookTitle = selectedBook.title,
+                            onPlayBook = { book ->
                                 selectedBook = book
-                                currentPositionSeconds = 0f
+                                currentPositionSeconds = book.audioPositionSeconds
                                 isPlaying = true
                                 Toast.makeText(context, "${book.title} oynatılıyor...", Toast.LENGTH_SHORT).show()
-                            },
-                            onBuyClick = {
-                                Toast.makeText(context, "Sesli Kitap satın alma sayfasına yönlendiriliyorsunuz...", Toast.LENGTH_LONG).show()
                             }
                         )
                     }
@@ -266,7 +203,10 @@ fun SesliKitapScreen(
                             isPlaying = isPlaying,
                             onPlayPauseToggle = { isPlaying = !isPlaying },
                             currentPositionSeconds = currentPositionSeconds,
-                            onPositionChange = { currentPositionSeconds = it },
+                            onPositionChange = { newPos ->
+                                currentPositionSeconds = newPos
+                                updateAudioProgress(selectedBook.title, newPos)
+                            },
                             playbackSpeed = playbackSpeed,
                             onSpeedChange = {
                                 playbackSpeed = when (playbackSpeed) {
@@ -279,7 +219,10 @@ fun SesliKitapScreen(
                             isMuted = isMuted,
                             onMuteToggle = { isMuted = !isMuted },
                             volume = currentVolume,
-                            onVolumeChange = { currentVolume = it }
+                            onVolumeChange = { currentVolume = it },
+                            onBuyClick = {
+                                Toast.makeText(context, "${selectedBook.title} satın alma sayfasına yönlendiriliyorsunuz...", Toast.LENGTH_LONG).show()
+                            }
                         )
                     }
                 }
@@ -318,7 +261,10 @@ fun SesliKitapScreen(
                                     isPlaying = isPlaying,
                                     onPlayPauseToggle = { isPlaying = !isPlaying },
                                     currentPositionSeconds = currentPositionSeconds,
-                                    onPositionChange = { currentPositionSeconds = it },
+                                    onPositionChange = { newPos ->
+                                        currentPositionSeconds = newPos
+                                        updateAudioProgress(selectedBook.title, newPos)
+                                    },
                                     playbackSpeed = playbackSpeed,
                                     onSpeedChange = {
                                         playbackSpeed = when (playbackSpeed) {
@@ -331,7 +277,10 @@ fun SesliKitapScreen(
                                     isMuted = isMuted,
                                     onMuteToggle = { isMuted = !isMuted },
                                     volume = currentVolume,
-                                    onVolumeChange = { currentVolume = it }
+                                    onVolumeChange = { currentVolume = it },
+                                    onBuyClick = {
+                                        Toast.makeText(context, "${selectedBook.title} satın alma sayfasına yönlendiriliyorsunuz...", Toast.LENGTH_LONG).show()
+                                    }
                                 )
                             }
                         }
@@ -346,15 +295,12 @@ fun SesliKitapScreen(
                                 BookListSections(
                                     purchasedBooks = purchasedBooks,
                                     sampleBooks = sampleBooks,
-                                    activeBookId = selectedBook.id,
-                                    onPlayBook = { book, isSample ->
+                                    activeBookTitle = selectedBook.title,
+                                    onPlayBook = { book ->
                                         selectedBook = book
-                                        currentPositionSeconds = 0f
+                                        currentPositionSeconds = book.audioPositionSeconds
                                         isPlaying = true
                                         showMobilePlayerScreen = true
-                                    },
-                                    onBuyClick = {
-                                        Toast.makeText(context, "Sesli Kitap satın alma sayfasına yönlendiriliyorsunuz...", Toast.LENGTH_LONG).show()
                                     }
                                 )
                                 Spacer(modifier = Modifier.height(110.dp))
@@ -382,99 +328,180 @@ fun SesliKitapScreen(
     }
 }
 
-// ─── Kitap Listeleri Arayüzü ───────────────────────────────
+// ─── Kitap Listeleri Arayüzü (Arama ve Sekmeli Yapı) ─────────────────────────
 @Composable
 private fun BookListSections(
-    purchasedBooks: List<Audiobook>,
-    sampleBooks: List<Audiobook>,
-    activeBookId: String,
-    onPlayBook: (Audiobook, Boolean) -> Unit,
-    onBuyClick: () -> Unit
+    purchasedBooks: List<Book>,
+    sampleBooks: List<Book>,
+    activeBookTitle: String,
+    onPlayBook: (Book) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
+
+    var purchasedSearchQuery by remember { mutableStateOf("") }
+    var sampleSearchQuery by remember { mutableStateOf("") }
+
+    val filteredPurchased = remember(purchasedSearchQuery, purchasedBooks) {
+        purchasedBooks.filter {
+            it.title.contains(purchasedSearchQuery, ignoreCase = true) ||
+            it.author.contains(purchasedSearchQuery, ignoreCase = true)
+        }
+    }
+
+    val filteredSample = remember(sampleSearchQuery, sampleBooks) {
+        sampleBooks.filter {
+            it.title.contains(sampleSearchQuery, ignoreCase = true) ||
+            it.author.contains(sampleSearchQuery, ignoreCase = true)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(
-            text = "Satın Alınmış Sesli Kitaplar",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = SlateLight,
-            modifier = Modifier.padding(vertical = 12.dp)
-        )
-        
-        purchasedBooks.forEach { book ->
-            val isActive = book.id == activeBookId
-            BookRowItem(
-                book = book,
-                isActive = isActive,
-                onPlay = { onPlayBook(book, false) },
-                buttonText = "Dinle"
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Tadımlık Dinle",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = SlateLight,
-            modifier = Modifier.padding(vertical = 12.dp)
-        )
-
-        sampleBooks.forEach { book ->
-            val isActive = book.id == activeBookId
-            BookRowItem(
-                book = book,
-                isActive = isActive,
-                onPlay = { onPlayBook(book, true) },
-                buttonText = "Tadımlık Dinle"
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        // "Sesli Kitap Al" Butonu
-        Button(
-            onClick = onBuyClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .shadow(4.dp, RoundedCornerShape(14.dp)),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Orange)
+        // Sekmeler (Kendi aralarında kaymalı geçişi destekler)
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = BgColor,
+            contentColor = Orange,
+            modifier = Modifier.padding(bottom = 16.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Headphones,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Sesli Kitap Al",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+            Tab(
+                selected = pagerState.currentPage == 0,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(0)
+                    }
+                },
+                text = { Text("Satın Alınanlar", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                selectedContentColor = Orange,
+                unselectedContentColor = TextMuted
+            )
+            Tab(
+                selected = pagerState.currentPage == 1,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(1)
+                    }
+                },
+                text = { Text("Tadımlık Dinle", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                selectedContentColor = Orange,
+                unselectedContentColor = TextMuted
+            )
+        }
+
+        // Pager ile kaydırılabilir içerikler
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { pageIndex ->
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (pageIndex == 0) {
+                    // Satın Alınanlar Arama Kutusu
+                    OutlinedTextField(
+                        value = purchasedSearchQuery,
+                        onValueChange = { purchasedSearchQuery = it },
+                        placeholder = { Text("Satın alınan sesli kitaplarda ara...", color = TextMuted, fontSize = 14.sp) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Orange) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Orange,
+                            unfocusedBorderColor = BorderClr,
+                            focusedContainerColor = CardBg,
+                            unfocusedContainerColor = CardBg
+                        ),
+                        singleLine = true
+                    )
+
+                    // Satın Alınan Kitaplar Listesi
+                    if (filteredPurchased.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Aramanıza uygun satın alınmış sesli kitap bulunamadı.",
+                                color = TextMuted,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        filteredPurchased.forEach { book ->
+                            val isActive = book.title == activeBookTitle
+                            BookRowItem(
+                                book = book,
+                                isActive = isActive,
+                                onPlay = { onPlayBook(book) },
+                                buttonText = "Dinle"
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+                    }
+                } else {
+                    // Tadımlık Arama Kutusu
+                    OutlinedTextField(
+                        value = sampleSearchQuery,
+                        onValueChange = { sampleSearchQuery = it },
+                        placeholder = { Text("Tadımlık sesli kitaplarda ara...", color = TextMuted, fontSize = 14.sp) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Orange) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Orange,
+                            unfocusedBorderColor = BorderClr,
+                            focusedContainerColor = CardBg,
+                            unfocusedContainerColor = CardBg
+                        ),
+                        singleLine = true
+                    )
+
+                    // Tadımlık Dinle Kitaplar Listesi
+                    if (filteredSample.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Aramanıza uygun tadımlık sesli kitap bulunamadı.",
+                                color = TextMuted,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        filteredSample.forEach { book ->
+                            val isActive = book.title == activeBookTitle
+                            BookRowItem(
+                                book = book,
+                                isActive = isActive,
+                                onPlay = { onPlayBook(book) },
+                                buttonText = "Tadımlık Dinle"
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+                    }
+                }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
 // ─── Tek Kitap Satırı Öğesi ─────────────────────────────────
 @Composable
 private fun BookRowItem(
-    book: Audiobook,
+    book: Book,
     isActive: Boolean,
     onPlay: () -> Unit,
     buttonText: String
@@ -495,7 +522,7 @@ private fun BookRowItem(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(2.dp, RoundedCornerShape(14.dp))
-            .clickable(onClick = onPlay), // Kartın tamamı artık tıklanabilir
+            .clickable(onClick = onPlay),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = borderStroke
@@ -541,15 +568,28 @@ private fun BookRowItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = book.duration,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Orange
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = book.duration,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Orange
+                    )
+                    if (book.progress >= 0) {
+                        Text(
+                            text = "• %${book.progress}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextMuted
+                        )
+                    }
+                }
             }
 
-            // Aksiyon Göstergesi (Artık buton değil, sadece şık bir gösterge kutusu)
+            // Aksiyon Göstergesi
             Box(
                 modifier = Modifier
                     .height(32.dp)
@@ -572,7 +612,7 @@ private fun BookRowItem(
 // ─── Mobil Alt Mini Oynatıcı ──────────────────────────────
 @Composable
 private fun MiniPlayerView(
-    book: Audiobook,
+    book: Book,
     isPlaying: Boolean,
     onPlayPauseToggle: () -> Unit,
     onOpenDetails: () -> Unit
@@ -644,7 +684,7 @@ private fun MiniPlayerView(
 // ─── Detaylı Oynatıcı Görünümü ─────────────────────────────
 @Composable
 private fun AudioPlayerView(
-    book: Audiobook,
+    book: Book,
     isPlaying: Boolean,
     onPlayPauseToggle: () -> Unit,
     currentPositionSeconds: Float,
@@ -654,7 +694,8 @@ private fun AudioPlayerView(
     isMuted: Boolean,
     onMuteToggle: () -> Unit,
     volume: Float,
-    onVolumeChange: (Float) -> Unit
+    onVolumeChange: (Float) -> Unit,
+    onBuyClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -888,6 +929,34 @@ private fun AudioPlayerView(
                 )
             }
         }
+
+        // Satın Alınmamış Kitaplar İçin Satın Al Butonu (Buraya Taşındı)
+        if (!book.isOwned) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = onBuyClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .shadow(4.dp, RoundedCornerShape(12.dp)),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Orange)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Sesli Kitabı Satın Al",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
     }
 }
 
@@ -902,5 +971,3 @@ private fun formatTime(seconds: Int): String {
         String.format("%02d:%02d", m, s)
     }
 }
-
-

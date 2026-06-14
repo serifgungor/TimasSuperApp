@@ -1,5 +1,8 @@
 package com.timas.superapp.screens
 
+import com.timas.superapp.Book
+import com.timas.superapp.LibraryDatabase
+
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -59,17 +62,6 @@ enum class ReaderTheme(
     DARK("Karanlık", Color(0xFF1E293B), Color(0xFFF1F5F9), Color(0xFF334155))
 }
 
-// ─── Veri Sınıfları ───────────────────────────────────────────
-data class EBook(
-    val id: String,
-    val title: String,
-    val author: String,
-    val coverUrl: String,
-    val progress: Int, // okuma yüzdesi (örn: 25)
-    val pages: List<String>,
-    val authorDetails: String = "",
-    val shortSummary: String = ""
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,111 +72,15 @@ fun EBookScreen(
     val context = LocalContext.current
 
     // E-Kitap Listeleri (Değişikliklerin ekranda anlık güncellenmesi için mutableStateListOf kullanıyoruz)
-    val purchasedBooks = remember {
-        mutableStateListOf(
-            EBook(
-                id = "eb1",
-                title = "Mutluluğun İnşası",
-                author = "Mecit Ömür Öztürk",
-                coverUrl = "https://cdn.timas.com.tr/urun/mutlulugun-insasi-9786050849745.jpg",
-                progress = 25,
-                pages = listOf(
-                    "Kapak",
-                    "Giriş: Mutluluk bir durum değil, bir yolculuktur. Bu kitapta, iç huzuru bulmanın ve gerçek mutluluğu inşa etmenin adımlarını keşfedeceksiniz. Her bölüm, pratik egzersizler ve düşünce provokasyonları ile desteklenmiştir.",
-                    "Bölüm 1: Hayatı Anlamlandırmak. Çoğu insan mutluluğu dışsal faktörlerde arar: yeni bir araba, daha büyük bir ev veya daha yüksek bir maaş. Ancak asıl huzur, zihnimizin içindeki sessiz köşelerde gizlidir.",
-                    "Bölüm 2: Kendini Kabul. Kendimizi olduğumuz gibi kabul etmek, büyümenin ilk şartıdır. Kusurlarımız bizi zayıf değil, eşsiz kılar. Hatalarımızdan öğrenip yola devam etmeliyiz.",
-                    "Bölüm 3: Anı Yaşamak. Geçmişin pişmanlıkları ve geleceğin kaygıları, şimdiki anın güzelliğini gölgeler. Sadece 'şimdi' gerçektir ve mutluluk ancak şimdiki zamanda inşa edilebilir."
-                ),
-                authorDetails = "Mecit Ömür Öztürk, 1980 doğumlu Türk yazar ve araştırmacıdır. Tasavvuf, kişisel gelişim ve ahlak felsefesi üzerine eserleri bulunmaktadır.",
-                shortSummary = "İnsanın dünyadaki içsel mutluluğunun temellerini sağlam bir şekilde atabilmesi için gerekli psikolojik ve pedagojik yaklaşımları ele alan bir rehber."
-            ),
-            EBook(
-                id = "eb2",
-                title = "Dilin Afetleri",
-                author = "İmam Gazali",
-                coverUrl = "https://cdn.timas.com.tr/urun/dilin-afetleri-9786259445182.jpg",
-                progress = 0,
-                pages = listOf(
-                    "Kapak",
-                    "Önsöz: İnsanın en büyük imtihanlarından biri olan dilin, ahlak ve maneviyat üzerindeki etkilerini anlatan klasik bir eser. Dil, kalbin aynasıdır der bilgeler.",
-                    "Gıybet ve Yalan: Gıybet etmek, ölü kardeşinin etini yemeye benzetilmiştir kadim metinlerde. Yalan ise, güveni ve toplumsal bağları kökünden sarsan en tehlikeli afettir.",
-                    "Sükutun Erdemi: İki kere düşünüp bir kere konuşmak, ya da susmak... Konuşmanın gümüş, sükutun ise altın olduğu unutulmamalıdır.",
-                    "Gözetmek ve Sakınmak: Söz söylemeden önce onun doğuracağı sonuçları tartmak olgun bir karakterin en temel göstergesidir."
-                ),
-                authorDetails = "İmam Gazzâlî (1058 - 1111), büyük İslam düşünürü, hukukçu ve mutasavvıftır. İslam dünyasında hüccetü'l-İslam unvanıyla tanınır.",
-                shortSummary = "Konuşmanın ahlaki boyutlarını, gıybet, yalan ve iftira gibi dilin afetlerinden korunma yollarını anlatan klasik başyapıt."
-            ),
-            EBook(
-                id = "eb3",
-                title = "Kur'an Atlası",
-                author = "Timaş Yayınları",
-                coverUrl = "https://cdn.timas.com.tr/urun/kuran-atlasi-9786256360525.jpg",
-                progress = 75,
-                pages = listOf(
-                    "Kapak",
-                    "Giriş: Kur'an-ı Kerim'de adı geçen coğrafi mekanların, kavimlerin ve olayların tarihi ve arkeolojik bilgilerle açıklandığı kapsamlı bir rehber.",
-                    "Kavimler Coğrafyası: Ad, Semud ve Nuh kavimlerinin yaşadığı bölgeler, arkeolojik kazılar ve tarihsel belgeler ışığında incelenmektedir.",
-                    "Kutsal Vadiler: Sina Dağı, Mekke ve Kudüs gibi kutsal mekanların tarihi önemleri ve Kur'an'daki tasvirleri.",
-                    "Tarihsel Yolculuklar: Peygamberlerin tebliğ faaliyetlerini sürdürdükleri güzergahlar ve bu güzergahların antik ticaret yolları ile ilişkisi."
-                ),
-                authorDetails = "Timaş Yayınları Araştırma Heyeti tarafından coğrafya ve tarih uzmanlarının katkılarıyla hazırlanmıştır.",
-                shortSummary = "Kur'an-ı Kerim'de geçen peygamberlerin hayatlarını, coğrafi konumlarını ve tarihi olayları atlas formatında sunan eser."
-            )
-        )
-    }
-
-    val sampleBooks = remember {
-        mutableStateListOf(
-            EBook(
-                id = "es1",
-                title = "Kalpsizler",
-                author = "Marissa Meyer",
-                coverUrl = "https://cdn.timas.com.tr/urun/kalpsizler-9786050847642.jpg",
-                progress = -1,
-                pages = listOf(
-                    "Kapak",
-                    "Tadımlık Bölüm 1: Kalpsizlerin dünyasında insanlık sorgulanıyor. Distopik bir gelecekte, duygulardan arındırılmış bir toplumda var olma mücadelesi veren gençlerin hikayesi.",
-                    "Tadımlık Bölüm 2: Sistemin kuralları nettir: Duygu belirtisi gösterenler izole edilir. Ancak bazı şeyler kurallardan daha güçlüdür."
-                ),
-                authorDetails = "Marissa Meyer, Amerikalı bilimkurgu ve fantastik kurgu yazarıdır. New York Times en çok satanlar listesine giren Ay Günlükleri serisiyle tanınır.",
-                shortSummary = "Harikalar Diyarı'nın en korkulan kraliçesi olmadan önce, Catherine sadece aşık olmak ve pastalar pişirmek isteyen bir genç kızdı..."
-            ),
-            EBook(
-                id = "es2",
-                title = "Politik Bir Beden",
-                author = "Timaş Yayınları",
-                coverUrl = "https://cdn.timas.com.tr/urun/mesnevi-terapi-9786050812749.jpg",
-                progress = -1,
-                pages = listOf(
-                    "Kapak",
-                    "Tadımlık Bölüm 1: Toplumsal cinsiyet ve siyaset üzerine modern bir analiz. Bedenin politikleşmesi, iktidar ilişkileri ve bireysel özgürlüklerin sınırları tartışılıyor.",
-                    "Tadımlık Bölüm 2: Toplumun normları bedeni nasıl şekillendirir ve birey bu normlar karşısında kendi özgür alanını nasıl korur?"
-                ),
-                authorDetails = "Timaş Akademi editörlüğü ve sosyoloji bölümü akademisyenleri tarafından derlenmiş bilimsel bir incelemedir.",
-                shortSummary = "Toplumsal cinsiyet ve siyaset üzerine modern bir analiz. Bedenin politikleşmesi, iktidar ilişkileri ve bireysel özgürlüklerin sınırları tartışılıyor."
-            ),
-            EBook(
-                id = "es3",
-                title = "Od",
-                author = "İskender Pala",
-                coverUrl = "https://cdn.timas.com.tr/urun/huzur-sokagi-ciltli-9786050830491.jpg",
-                progress = -1,
-                pages = listOf(
-                    "Kapak",
-                    "Tadımlık Bölüm 1: Yunus Emre'nin hayatından kesitler sunan, tasavvufi derinliği ve şiirsel anlatımıyla dinleyiciyi büyüleyen tarihi bir roman.",
-                    "Tadımlık Bölüm 2: Aşkın ateşinde yanmak, benlikten geçip bütüne kavuşmak. Yunus'un Taptuk Emre dergahındaki çileli ama kutlu kapısı."
-                ),
-                authorDetails = "İskender Pala, Türk akademisyen, yazar ve divan edebiyatı araştırmacısıdır. Tarihi romanlarıyla geniş kitlelere ulaşmıştır.",
-                shortSummary = "Yunus Emre'nin hayatından kesitler sunan, tasavvufi derinliği ve şiirsel anlatımıyla okuyucuyu büyüleyen tarihi bir roman."
-            )
-        )
-    }
+    val libraryBooks = LibraryDatabase.books
+    val purchasedBooks = libraryBooks.filter { it.isOwned }
+    val sampleBooks = libraryBooks.filter { !it.isOwned }
 
     // Durum Yönetimi
-    var selectedBook by remember { mutableStateOf(purchasedBooks[0]) }
+    var selectedBook by remember { mutableStateOf(purchasedBooks.firstOrNull() ?: libraryBooks[0]) }
 
     val initialPage = remember(selectedBook.id) {
-        val total = selectedBook.pages.size
+        val total = selectedBook.getBookPages().size
         if (total > 1) {
             if (selectedBook.progress >= 0) {
                 kotlin.math.round((selectedBook.progress.toFloat() / 100f) * (total - 1)).toInt().coerceIn(0, total - 1)
@@ -197,8 +93,8 @@ fun EBookScreen(
     }
     var currentPageIndex by remember(selectedBook.id) { mutableStateOf(initialPage) }
 
-    val selectBookAndSyncProgress: (EBook) -> Unit = { book ->
-        val total = book.pages.size
+    val selectBookAndSyncProgress: (Book) -> Unit = { book ->
+        val total = book.getBookPages().size
         val initialPageIdx = if (total > 1) {
             if (book.progress >= 0) {
                 kotlin.math.round((book.progress.toFloat() / 100f) * (total - 1)).toInt().coerceIn(0, total - 1)
@@ -214,16 +110,10 @@ fun EBookScreen(
             100
         }
 
-        val idx = purchasedBooks.indexOfFirst { it.id == book.id }
+        val idx = LibraryDatabase.books.indexOfFirst { it.title == book.title }
         if (idx != -1) {
-            purchasedBooks[idx] = purchasedBooks[idx].copy(progress = exactProgress)
-            selectedBook = purchasedBooks[idx]
-        } else {
-            val sIdx = sampleBooks.indexOfFirst { it.id == book.id }
-            if (sIdx != -1) {
-                sampleBooks[sIdx] = sampleBooks[sIdx].copy(progress = exactProgress)
-                selectedBook = sampleBooks[sIdx]
-            }
+            LibraryDatabase.books[idx] = LibraryDatabase.books[idx].copy(progress = exactProgress)
+            selectedBook = LibraryDatabase.books[idx]
         }
     }
 
@@ -332,23 +222,17 @@ fun EBookScreen(
                             currentPageIndex = currentPageIndex,
                             onPageChange = { newPageIdx ->
                                 currentPageIndex = newPageIdx
-                                val totalPages = selectedBook.pages.size
+                                val totalPages = selectedBook.getBookPages().size
                                 if (totalPages > 0) {
                                     val newProgress = if (totalPages > 1) {
                                         kotlin.math.round((newPageIdx.toFloat() / (totalPages - 1)) * 100).toInt()
                                     } else {
                                         100
                                     }
-                                    val idx = purchasedBooks.indexOfFirst { it.id == selectedBook.id }
+                                    val idx = LibraryDatabase.books.indexOfFirst { it.title == selectedBook.title }
                                     if (idx != -1) {
-                                        purchasedBooks[idx] = purchasedBooks[idx].copy(progress = newProgress)
-                                        selectedBook = purchasedBooks[idx]
-                                    } else {
-                                        val sIdx = sampleBooks.indexOfFirst { it.id == selectedBook.id }
-                                        if (sIdx != -1) {
-                                            sampleBooks[sIdx] = sampleBooks[sIdx].copy(progress = newProgress)
-                                            selectedBook = sampleBooks[sIdx]
-                                        }
+                                        LibraryDatabase.books[idx] = LibraryDatabase.books[idx].copy(progress = newProgress)
+                                        selectedBook = LibraryDatabase.books[idx]
                                     }
                                 }
                             },
@@ -399,24 +283,18 @@ fun EBookScreen(
                                     currentPageIndex = currentPageIndex,
                                     onPageChange = { newPageIdx ->
                                         currentPageIndex = newPageIdx
-                                        val totalPages = selectedBook.pages.size
+                                        val totalPages = selectedBook.getBookPages().size
                                         if (totalPages > 0) {
                                             val newProgress = if (totalPages > 1) {
                                                 kotlin.math.round((newPageIdx.toFloat() / (totalPages - 1)) * 100).toInt()
                                             } else {
                                                 100
                                             }
-                                            val idx = purchasedBooks.indexOfFirst { it.id == selectedBook.id }
-                                            if (idx != -1) {
-                                                purchasedBooks[idx] = purchasedBooks[idx].copy(progress = newProgress)
-                                                selectedBook = purchasedBooks[idx]
-                                            } else {
-                                                val sIdx = sampleBooks.indexOfFirst { it.id == selectedBook.id }
-                                                if (sIdx != -1) {
-                                                    sampleBooks[sIdx] = sampleBooks[sIdx].copy(progress = newProgress)
-                                                    selectedBook = sampleBooks[sIdx]
-                                                }
-                                            }
+                                            val idx = LibraryDatabase.books.indexOfFirst { it.title == selectedBook.title }
+                                    if (idx != -1) {
+                                        LibraryDatabase.books[idx] = LibraryDatabase.books[idx].copy(progress = newProgress)
+                                        selectedBook = LibraryDatabase.books[idx]
+                                    }
                                         }
                                     },
                                     theme = readerTheme,
@@ -461,10 +339,10 @@ fun EBookScreen(
 // ─── Kitap Listeleri Arayüzü (Arama ve Tabs Desteği ile) ────────────────────────
 @Composable
 private fun EBookListSections(
-    purchasedBooks: List<EBook>,
-    sampleBooks: List<EBook>,
+    purchasedBooks: List<Book>,
+    sampleBooks: List<Book>,
     activeBookId: String,
-    onSelectBook: (EBook) -> Unit
+    onSelectBook: (Book) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
@@ -631,7 +509,7 @@ private fun EBookListSections(
 // ─── Tek E-Kitap Satırı Öğesi ───────────────────────────────
 @Composable
 private fun EBookRowItem(
-    book: EBook,
+    book: Book,
     isActive: Boolean,
     onSelect: () -> Unit,
     buttonText: String
@@ -756,7 +634,7 @@ private fun EBookRowItem(
 // ─── Etkileşimli E-Okuyucu Görünümü ──────────────────────────
 @Composable
 private fun EBookReaderView(
-    book: EBook,
+    book: Book,
     currentPageIndex: Int,
     onPageChange: (Int) -> Unit,
     theme: ReaderTheme,
@@ -767,7 +645,7 @@ private fun EBookReaderView(
     onFontFamilyToggle: () -> Unit,
     onBuyClick: () -> Unit
 ) {
-    val totalPages = book.pages.size
+    val totalPages = book.getBookPages().size
     val fontFamily = if (isSerif) FontFamily.Serif else FontFamily.Default
 
     Column(
@@ -1077,7 +955,7 @@ private fun EBookReaderView(
                     }
                 } else {
                     Text(
-                        text = book.pages.getOrElse(pageIdx) { "" },
+                        text = book.getBookPages().getOrElse(pageIdx) { "" },
                         fontSize = fontSize,
                         fontFamily = fontFamily,
                         color = theme.textColor,
