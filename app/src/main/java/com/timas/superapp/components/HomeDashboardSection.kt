@@ -50,13 +50,84 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
     val bookCardHeight = if (isTablet) 325.dp else 255.dp
 
     val books = listOf(
-        DashboardBook("Mutluluğun İnşası", "Mecit Ömür Öztürk", "https://cdn.timas.com.tr/urun/mutlulugun-insasi-9786050849745.jpg", "Mutluluğa giden yolda içsel bir rehber."),
-        DashboardBook("Dilin Afetleri", "İmam Gazzâlî", "https://cdn.timas.com.tr/urun/dilin-afetleri-9786259445182.jpg", "Dilin tehlikeleri ve korunma yolları."),
-        DashboardBook("Kur'an Atlası", "Timaş Yayınları", "https://cdn.timas.com.tr/urun/kuran-atlasi-9786256360525.jpg", "Kur'an-ı Kerim'i anlamaya yardımcı eşsiz bir kaynak."),
-        DashboardBook("Kalpsizler", "Marissa Meyer", "https://cdn.timas.com.tr/urun/kalpsizler-9786050847642.jpg", "Modern insanın duygusal yabancılaşmasını anlatan güçlü bir roman."),
-        DashboardBook("Politik Bir Beden...", "Timaş Yayınları", "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300", "Siyaset ve insan bedeni üzerine derin bir inceleme."),
-        DashboardBook("Tavuk Bacaklı Ev...", "Sophie Anderson", "https://satinal.timas.com.tr/tavuk-bacakli-ev-kaciyor-bilim-kurgu-ve-fantastik-genc-timas-sophie-anderson-37697-14-O.jpg", "Marinka kendini bildi bileli tavuk bacakları olan bir evde yaşadı. O ev sayesinde dünyayı dolaştı ve akla hayale sığmayacak maceralara atıldı. Ne var ki Marinka'nın tavuk bacaklı evi, eski neşesini kaybediyor gibiydi. Marinka, evin neden böyle davrandığını anlamaya çalışırken ev birden koşmaya başladı. Tavuk bacaklı ev kaçıyordu! Marinka ve arkadaşları, evin peşinden koşarlarken kendilerini hangi maceraların beklediğinden habersizlerdi. Tavuk bacaklı ev neden kaçıyordu? Acaba kaçmayı bırakıp Marinka ve arkadaşlarının kendisine yardım etmesine izin verecek miydi? Tavuk Bacaklı Ev Kaçıyor, serinin ilk kitabını sevenlere muhteşem bir macera daha vadediyor."),
-        DashboardBook("Ağaçların Fısıltısı", "Murat Moroğlu", "https://satinal.timas.com.tr/agaclarin-fisiltisi-umutlu-kitaplar-timas-cocuk-murat-moroglu-37713-14-O.webp", "Çorak topraklardan yemyeşil masal diyarına uzanan bir yolculuk… Okul ödevi için mahallenin sessiz kahramanı Yılmaz amcanın kapısını çalan Ece, onu bekleyen sürprizden habersizdir. Yıllar önce bir çocuğun koca bir bozkırı ormana dönüştürme hayaliyle başlayan bu serüven, Ece’nin ellerinde yeniden canlanır. Bir insanın azmi dünyayı nasıl değiştirir? “Ağaçların Fısıltısı”, sizi vazgeçmeyen kalplerin yazdığı o yeşil mucizeye davet ediyor.")
+        DashboardBook(
+            "Mutluluğun İnşası",
+            "Mecit Ömür Öztürk",
+            "https://cdn.timas.com.tr/urun/mutlulugun-insasi-9786050849745.jpg",
+            "İnsanın dünyada iki temel görevi vardır: Bunlardan biri iç dünyasını düzene sokmak, diğeri tabiatı şekillendirmektir. Mecit Ömür Öztürk, Mutluluğun İnşası’nda içimizdeki mutluluğun temellerini nasıl sağlam bir şekilde atabileceğimizi sıcak ve samimi bir dille aktarıyor."
+        ),
+        DashboardBook(
+            "Keşke Dememek İçin",
+            "Yasin Pişgin",
+            "https://cdn.timas.com.tr/urun/keske-dememek-icin-9786259621555.jpg",
+            "Bu kitapta incelenen ayetlerde; ölümden sonra dirilenler, hesaba girip çıkanlar ve yaşadıklarına bin pişman olanlar konuşuyorlar. Ve bize günahlarını, pişmanlıklarını ve keşkelerini anlatarak adeta dirilere nasihat ediyorlar."
+        ),
+        DashboardBook(
+            "Dilin Afetleri",
+            "İmam Gazzâlî",
+            "https://cdn.timas.com.tr/urun/dilin-afetleri-9786259445182.jpg",
+            "Dil, Allah’ın (cc) insana bahşettiği en büyük nimetlerden biridir. Büyük İslam düşünürü İmam Gazzâlî’nin çağları aşan meşhur eseri İhya’nın Mühlikat kısmında yer alan Dilin Afetleri, konuşmanın sınırlarını ve susmanın erdemini akıcı ve rahat anlaşılır bir üslupla ele alıyor."
+        ),
+        DashboardBook(
+            "Kur'an Atlası",
+            "Yusuf Gündüz",
+            "https://cdn.timas.com.tr/urun/kuran-atlasi-9786256360525.jpg",
+            "Kur'an-ı Kerim, dünyanın kullanım kılavuzu. Kur'an Atlası, bize bu önemli kılavuzu anlamakta yardımcı olacak. Başta Sevgili Peygamberimiz Hz. Muhammed olmak üzere Kur'an'da adı geçen peygamberlerin hayatlarını, coğrafi mekanları ve tarihi olayları bu eşsiz kitapta okuyacaksınız."
+        ),
+        DashboardBook(
+            "Kitabın Yolcuları",
+            "Olga Tokarczuk",
+            "https://cdn.timas.com.tr/urun/kitapin-yolculari-9786050849776.jpg",
+            "Fransa, 1685. Bir grup Protestan Huguenot, yeni bir vatan bulma umuduyla ülkenin diğer ucuna ulaşmak üzere yola çıkar. Zaman zaman maceraya dönüşen bu yolculuk, yalnızca onların kaderini değil, tüm insanlığın tarihini değiştirebilir."
+        ),
+        DashboardBook(
+            "Malma İstasyonu",
+            "Alex Schulman",
+            "https://cdn.timas.com.tr/urun/malma-istasyonu-9786050848533.jpg",
+            "Bir tren, enfes bir yaz manzarasında hızla ilerliyor. Harriet, Oskar ve Yana –her biri, noktaları birleştirmeye çalışırken bir önceki zamanın izlerini taşıyor. Kuşaklar üzerinden yalnızlıklar, travmalar ve tamir edilemez ilişkilerin dağıttığı bir ailenin hikâyesi."
+        ),
+        DashboardBook(
+            "İçimdeki Hayal",
+            "Sharon M. Draper",
+            "https://cdn.timas.com.tr/urun/icimdeki-hayal-9786259727455.jpg",
+            "Melody konuşma engeline rağmen içindeki zengin dünyayı yansıtmaya devam ediyor. 'İçimdeki Müzik'in devam romanında Melody'nin yeni hayalleri ve hayat dolu mücadelesi."
+        ),
+        DashboardBook(
+            "İyilik Timi",
+            "Metin Özdamarlar",
+            "https://cdn.timas.com.tr/urun/iyilik-timi-9786259834658.jpg",
+            "İyilik Timi’yle beraber heyecanlı maceralar yaşamaya hazır mısın? Çikolata makinesi yapımı, Kuru Fasulye Şenliği, Tüm mahalleye dondurma dağıtmaca ve daha nicesi. Bu kitap seni kalbinden vuracak maceralara sürükleyecek!"
+        ),
+        DashboardBook(
+            "Uçan Anne Terliği",
+            "Anıl Basılı",
+            "https://cdn.timas.com.tr/urun/ucan-anne-terligi-9786255978714.jpg",
+            "Nerede birlik orada dirlik! Aile içi yardımlaşma, dostluk ve dayanışmanın eğlenceli ve sıcacık hikayesini anlatan Anıl Basılı imzalı neşeli bir macera."
+        ),
+        DashboardBook(
+            "Alyanak Projesi / Nuriye Ecmel",
+            "Merve Özcan",
+            "https://cdn.timas.com.tr/urun/alyanak-projesi-nuriye-ecmel-9786259802008.jpg",
+            "Ben Nuriye Ecmel... Bu iyilik macerasının adı da 'Alyanak Projesi'. İyilik macerasında neler mi oluyor? Alyanak kim mi? Rahat olun ve arkanıza yaslanarak bu iyilik serüveninin tadını çıkarın."
+        ),
+        DashboardBook(
+            "Kalpsizler",
+            "Marissa Meyer",
+            "https://cdn.timas.com.tr/urun/kalpsizler-9786050847642.jpg",
+            "Harikalar Diyarı'nın en korkulan kraliçesi olmadan önce, Catherine sadece aşık olmak ve pastalar pişirmek isteyen bir genç kızdı..."
+        ),
+        DashboardBook(
+            "Tavuk Bacaklı Ev Kaçıyor",
+            "Sophie Anderson",
+            "https://cdn.timas.com.tr/urun/tavuk-bacakli-ev-kaciyor-9786259232645.jpg",
+            "Marinka kendini bildi bileli tavuk bacakları olan bir evde yaşadı. Evleri sürekli yer değiştirir, onlara hayal edilemez dünyalar sunardı..."
+        ),
+        DashboardBook(
+            "Ağaçların Fısıltısı",
+            "Murat Moroğlu",
+            "https://cdn.timas.com.tr/urun/agaclarin-fisiltisi-9786258618112.jpg",
+            "Çorak topraklardan yemyeşil masal diyarına uzanan bir doğa yolculuğu… Bir çocuğun azmi dünyayı nasıl yeşile boyar?"
+        )
     )
 
     val events = listOf(

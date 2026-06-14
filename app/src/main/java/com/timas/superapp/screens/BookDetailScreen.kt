@@ -65,7 +65,7 @@ fun BookDetailScreen(
     onStartListening: (Book) -> Unit = {},
     isLightMode: Boolean = false
 ) {
-    val bgColor = if (isLightMode) Color(0xFFF8FAFC) else Color(0xFF0F172A)
+    val bgColor = if (isLightMode) Color(0xFFF8FAFC) else Color(0xFF18100C)
     val surfaceColor = if (isLightMode) Color(0xFFFFF0E5) else Color(0xFF261D1A)
     val textColor = if (isLightMode) Color(0xFF1E293B) else Color.White
     val cardBgColor = if (isLightMode) Color(0xFFFFF0E5) else Color(0xFF261D1A)
