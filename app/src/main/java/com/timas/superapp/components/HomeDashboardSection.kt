@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -175,39 +176,40 @@ fun BookCard(book: DashboardBook, onInceleClick: () -> Unit) {
     }
 }
 
+// Helper to parse dates like "15 Haziran" or "Her Cumartesi" into Day and Month parts
+fun parseEventDate(dateStr: String): Pair<String, String> {
+    val parts = dateStr.split(" ")
+    return if (parts.size >= 2) {
+        val day = parts[0]
+        val month = parts[1].take(3).uppercase()
+        Pair(day, month)
+    } else {
+        // Fallback for strings without spaces
+        val clean = dateStr.take(3)
+        Pair(clean, "ETK")
+    }
+}
+
 @Composable
 fun EtkinlikTakvimi(events: List<DashboardEvent>, onKatilClick: (String) -> Unit, listModifier: Modifier = Modifier) {
     var selectedEvent by remember { mutableStateOf<DashboardEvent?>(null) }
+    var eventToConfirm by remember { mutableStateOf<DashboardEvent?>(null) }
 
     Column {
         Text("Etkinlik Takvimi", fontWeight = FontWeight.Bold, color = Color(0xFF1E293B), fontSize = 16.sp)
         Spacer(modifier = Modifier.height(12.dp))
         
-        // Etkinlikleri ikişerli gruplayarak grid şeklinde gösterelim
-        val chunkedEvents = events.chunked(2)
+        // Show events in a beautiful vertical timeline list
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = listModifier
         ) {
-            chunkedEvents.forEach { rowEvents ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), 
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    rowEvents.forEach { event ->
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                            EventCard(
-                                event, 
-                                onKatilClick, 
-                                onDetayClick = { selectedEvent = event },
-                                modifier = Modifier.fillMaxHeight()
-                            )
-                        }
-                    }
-                    if (rowEvents.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
+            events.forEach { event ->
+                EventRowCard(
+                    event = event, 
+                    onKatilClick = { eventToConfirm = event }, 
+                    onDetayClick = { selectedEvent = event }
+                )
             }
         }
     }
@@ -217,47 +219,174 @@ fun EtkinlikTakvimi(events: List<DashboardEvent>, onKatilClick: (String) -> Unit
             event = event,
             onDismiss = { selectedEvent = null },
             onKatilClick = { 
-                onKatilClick(it)
                 selectedEvent = null
+                eventToConfirm = event
             }
+        )
+    }
+
+    if (eventToConfirm != null) {
+        AlertDialog(
+            onDismissRequest = { eventToConfirm = null },
+            title = {
+                Text(
+                    text = "Katılım Onayı",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+            },
+            text = {
+                Text(
+                    text = "${eventToConfirm!!.title} etkinliğine katılmak istediğinizden emin misiniz?",
+                    color = Color(0xFF64748B)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onKatilClick(eventToConfirm!!.title)
+                        eventToConfirm = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF26122))
+                ) {
+                    Text("Evet, Katıl", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToConfirm = null }) {
+                    Text("Vazgeç", color = Color(0xFF64748B))
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.White
         )
     }
 }
 
 @Composable
-fun EventCard(
+fun EventRowCard(
     event: DashboardEvent, 
-    onKatilClick: (String) -> Unit, 
+    onKatilClick: () -> Unit, 
     onDetayClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (day, month) = remember(event.date) { parseEventDate(event.date) }
+    
     Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onDetayClick() },
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(1.dp),
-        border = borderStroke(Color(0xFFE2E8F0))
+        elevation = CardDefaults.cardElevation(2.dp),
+        border = borderStroke(Color(0xFFF1F5F9))
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+            // 1. Date Badge
+            Box(
+                modifier = Modifier
+                    .width(62.dp)
+                    .height(58.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFFFF0EB))
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = event.icon, contentDescription = null, tint = event.iconTint, modifier = Modifier.size(24.dp))
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(event.title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFF1E293B), textAlign = TextAlign.Center)
-                Text(event.date, fontSize = 10.sp, color = Color.Gray)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = day,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 15.sp,
+                        color = Color(0xFFF26122),
+                        lineHeight = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(1.dp))
+                    Text(
+                        text = month,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.sp,
+                        color = Color(0xFFF26122).copy(alpha = 0.8f),
+                        lineHeight = 10.sp
+                    )
+                }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Detay", color = Color(0xFF4AC2E3), fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { onDetayClick() })
-                Text("Katıl", color = Color(0xFFF26122), fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { onKatilClick(event.title) })
+            // 2. Info details
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = event.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = Color(0xFF1E293B),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = event.icon,
+                        contentDescription = null,
+                        tint = event.iconTint,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Text(
+                        text = event.location,
+                        fontSize = 10.sp,
+                        color = Color(0xFF64748B),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "• 120+ Katılımcı",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF27AE60)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // 3. Actions Column
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Detay",
+                    color = Color(0xFF4AC2E3),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onDetayClick() }
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFF26122))
+                        .clickable { onKatilClick() }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "Katıl",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -305,70 +434,381 @@ fun BookDetailDialog(book: DashboardBook, onDismiss: () -> Unit) {
 
 @Composable
 fun EventDetailDialog(event: DashboardEvent, onDismiss: () -> Unit, onKatilClick: (String) -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    val hostName = when {
+        event.title.contains("Yazarlar") -> "Nazan Bekiroğlu"
+        event.title.contains("Okuma Kulübü") -> "Zeynep Koç"
+        event.title.contains("Şiir") -> "Ahmet Yılmaz"
+        else -> "Timaş Yayınları Editör Ekibi"
+    }
+    
+    val hostTitle = when {
+        event.title.contains("Yazarlar") -> "Yazar & Akademisyen"
+        event.title.contains("Okuma Kulübü") -> "Kulüp Moderatörü"
+        event.title.contains("Şiir") -> "Şair & Edebiyatçı"
+        else -> "Etkinlik Koordinatörü"
+    }
+
+    val hostAvatarUrl = when {
+        event.title.contains("Yazarlar") -> "https://picsum.photos/id/1011/100/100"
+        event.title.contains("Okuma Kulübü") -> "https://picsum.photos/id/1025/100/100"
+        event.title.contains("Şiir") -> "https://picsum.photos/id/1012/100/100"
+        else -> "https://picsum.photos/id/1015/100/100"
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = true
+        )
+    ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(24.dp),
             color = Color.White,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .fillMaxHeight(0.9f)
+                .clip(RoundedCornerShape(24.dp))
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                // Top header with light background
+                // Top Header (Ticket Head)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFFFFF0E5))
-                        .padding(vertical = 24.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(vertical = 24.dp, horizontal = 20.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(32.dp)
+                            .background(Color.Black.copy(alpha = 0.05f), CircleShape)
+                    ) {
                         Icon(
-                            imageVector = event.icon,
-                            contentDescription = null,
-                            tint = event.iconTint,
-                            modifier = Modifier.size(48.dp)
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Kapat",
+                            tint = Color(0xFF1E293B),
+                            modifier = Modifier.size(16.dp)
                         )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White)
+                                .padding(12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = event.icon,
+                                contentDescription = null,
+                                tint = event.iconTint,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Text(
+                            text = "TİMAŞ KÜLTÜR ETKİNLİĞİ",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFF26122),
+                            letterSpacing = 1.5.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        
                         Text(
                             text = event.title,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
                             color = Color(0xFF1E293B),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontFamily = FontFamily.Serif
                         )
                     }
                 }
                 
-                // Bottom details
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.Event, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = event.date, color = Color.Gray, fontSize = 14.sp)
+                // Bottom Details
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    // 1. Info Cards (Date & Location)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Date Box
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFF8FAFC))
+                                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                                .padding(12.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarToday,
+                                        contentDescription = null,
+                                        tint = Color(0xFFF26122),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = "Tarih & Saat",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                                Text(
+                                    text = event.date,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF1E293B)
+                                )
+                            }
+                        }
+
+                        // Location Box
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFF8FAFC))
+                                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                                .padding(12.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.LocationOn,
+                                        contentDescription = null,
+                                        tint = Color(0xFFF26122),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = "Konum",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                                Text(
+                                    text = event.location,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF1E293B),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = event.location, color = Color.Gray, fontSize = 14.sp)
-                    }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(text = "Etkinlik Detayları", fontWeight = FontWeight.Bold, color = Color(0xFF1E293B), fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = event.description, color = Color.Gray, fontSize = 14.sp, lineHeight = 20.sp)
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Button(
-                        onClick = { onKatilClick(event.title) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF26122)),
-                        shape = RoundedCornerShape(24.dp),
+
+                    // 2. RSVP & Capacity Stats
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0xFFF1F5F9).copy(alpha = 0.5f))
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("Etkinliğe Katıl", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF27AE60),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "120+ Kişi Katılıyor",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF27AE60)
+                                )
+                            }
+                            Text(
+                                text = "Kapasite: %85 Dolu",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF64748B)
+                            )
+                        }
+                        
+                        LinearProgressIndicator(
+                            progress = { 0.85f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(CircleShape),
+                            color = Color(0xFFF26122),
+                            trackColor = Color(0xFFFFF0EB)
+                        )
+
+                        // Attendee Avatars Stack Row
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            // Render 3 overlapping avatars
+                            val colors = listOf(Color(0xFF3498DB), Color(0xFFE74C3C), Color(0xFFF1C40F))
+                            val initials = listOf("A", "M", "Z")
+                            Box(modifier = Modifier.height(24.dp)) {
+                                for (i in 0 until 3) {
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(x = (i * 16).dp)
+                                            .size(24.dp)
+                                            .clip(CircleShape)
+                                            .background(colors[i])
+                                            .border(1.5.dp, Color.White, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = initials[i],
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(36.dp))
+                            Text(
+                                text = "ve 117 kişi daha bu etkinliğe katılıyor.",
+                                fontSize = 11.sp,
+                                color = Color(0xFF64748B),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    // 3. Speaker / Host section
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFFFF8F5))
+                            .border(1.dp, Color(0xFFFFF0EB), RoundedCornerShape(12.dp))
+                            .padding(12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            AsyncImage(
+                                model = hostAvatarUrl,
+                                contentDescription = hostName,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFE2E8F0)),
+                                contentScale = ContentScale.Crop
+                            )
+                            Column {
+                                Text(
+                                    text = "EV SAHİBİ / KONUŞMACI",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFF26122),
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = hostName,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1E293B)
+                                )
+                                Text(
+                                    text = hostTitle,
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+                    }
+
+                    // 4. Description
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = "Etkinlik Hakkında",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B),
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = event.description,
+                            color = Color(0xFF64748B),
+                            fontSize = 13.sp,
+                            lineHeight = 20.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // 5. Actions
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF64748B))
+                        ) {
+                            Text("Kapat", fontWeight = FontWeight.Bold)
+                        }
+
+                        Button(
+                            onClick = { onKatilClick(event.title) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF26122)),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(2.5f)
+                                .height(48.dp)
+                        ) {
+                            Text(
+                                text = "Etkinliğe Katıl",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }

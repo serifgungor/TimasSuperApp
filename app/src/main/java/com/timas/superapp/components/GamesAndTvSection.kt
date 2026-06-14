@@ -2,6 +2,7 @@ package com.timas.superapp.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -32,14 +34,18 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import coil.compose.AsyncImage
+import com.timas.superapp.R
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 
 data class TimasGame(
     val title: String,
     val subtitle: String,
-    val icon: ImageVector,
-    val iconTint: Color,
-    val iconBgColor: Color
+    val url: String,
+    val iconResId: Int,
+    val gradientColors: List<Color>,
+    val badgeText: String? = null
 )
 
 data class TimasVideo(
@@ -55,20 +61,52 @@ fun GamesAndTvSection() {
     val isTablet = configuration.screenWidthDp >= 600
 
     val games = listOf(
-        TimasGame("Kelime Avı", "Harfleri birleştir, kelimeyi bul.", Icons.Default.Search, Color(0xFFE65100), Color(0xFFFFE0B2).copy(alpha = 0.5f)),
-        TimasGame("Kim Bilmek İster", "Bilgi yarışmasında rekabet et.", Icons.Default.EmojiEvents, Color(0xFFF57F17), Color(0xFFFFF9C4).copy(alpha = 0.5f)),
-        TimasGame("Harf Bulmaca", "Eksik harfleri tamamla.", Icons.Default.Extension, Color(0xFF00796B), Color(0xFFB2DFDB).copy(alpha = 0.5f)),
-        TimasGame("Bilgi Yarışması", "Genel kültürünü sına.", Icons.Default.Psychology, Color(0xFF512DA8), Color(0xFFD1C4E9).copy(alpha = 0.5f))
+        TimasGame(
+            title = "Kelime Oyunu",
+            subtitle = "Harfleri birleştir, kelimeleri bul!",
+            url = "https://lemoni.tr/KemileOyunu.html",
+            iconResId = R.drawable.game_kelime_oyunu,
+            gradientColors = listOf(Color(0xFFFF8A65), Color(0xFFE64A19)),
+            badgeText = "Yeni"
+        ),
+        TimasGame(
+            title = "Kelime Avı",
+            subtitle = "Gizlenmiş kelimeleri yakala!",
+            url = "https://lemoni.tr/KelmieAvi.Html",
+            iconResId = R.drawable.game_kelime_avi,
+            gradientColors = listOf(Color(0xFF4DB6AC), Color(0xFF00796B)),
+            badgeText = "Popüler"
+        ),
+        TimasGame(
+            title = "Milyoner",
+            subtitle = "Soruları cevapla, zirveye ulaş!",
+            url = "https://lemoni.tr/Milyoner.html",
+            iconResId = R.drawable.game_milyoner,
+            gradientColors = listOf(Color(0xFF9575CD), Color(0xFF512DA8)),
+            badgeText = "Efsane"
+        ),
+        TimasGame(
+            title = "Kültür Merkezi",
+            subtitle = "Genel kültür sorularıyla yarışın!",
+            url = "https://lemoni.tr/3Te3.html",
+            iconResId = R.drawable.game_zekii_bulmaca,
+            gradientColors = listOf(Color(0xFF29B6F6), Color(0xFF0288D1)),
+            badgeText = "Yeni"
+        )
     )
 
     val videos = listOf(
-        TimasVideo("Levent ile Şirin Maceralar", "12:45", "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=300", "i-sM_O0xW1g"),
-        TimasVideo("Timaş Çocuk Hikayeleri", "08:30", "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300", "i-sM_O0xW1g"),
-        TimasVideo("Eğlenceli Bilgi Dünyası", "15:20", "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&q=80&w=300", "i-sM_O0xW1g"),
-        TimasVideo("Masal Saati", "10:15", "https://images.unsplash.com/photo-1516585427167-9f4af9627e6c?auto=format&fit=crop&q=80&w=300", "i-sM_O0xW1g")
+        TimasVideo("Duvarın Arkasında Ne Var?", "04:15", "https://img.youtube.com/vi/Q8oq-bUc3uM/hqdefault.jpg", "Q8oq-bUc3uM"),
+        TimasVideo("Biri Diğeri Öteki Beriki", "02:30", "https://img.youtube.com/vi/nlsw8sskJks/hqdefault.jpg", "nlsw8sskJks"),
+        TimasVideo("Kanatlarım Var Benim", "03:10", "https://img.youtube.com/vi/JoWT87W7YQg/hqdefault.jpg", "JoWT87W7YQg"),
+        TimasVideo("Gel Bana Masal Anlat", "05:45", "https://img.youtube.com/vi/T2IWqVaXnuY/hqdefault.jpg", "T2IWqVaXnuY"),
+        TimasVideo("Yolcu Oyunu", "06:20", "https://img.youtube.com/vi/tgPDWbF16yk/hqdefault.jpg", "tgPDWbF16yk")
     )
     
     val (selectedVideo, setSelectedVideo) = remember { mutableStateOf<TimasVideo?>(null) }
+    val (selectedGame, setSelectedGame) = remember { mutableStateOf<TimasGame?>(null) }
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -81,16 +119,28 @@ fun GamesAndTvSection() {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    TimasOyunSection(games)
+                    TimasOyunSection(games, isTablet = true, onGameClick = { game ->
+                        if (game.badgeText == "Yakında" || game.url.isEmpty()) {
+                            Toast.makeText(context, "${game.title} yakında sizlerle!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            setSelectedGame(game)
+                        }
+                    })
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    TimasCocukTvSection(videos, onVideoClick = { setSelectedVideo(it) })
+                    TimasCocukTvSection(videos, isTablet = true, onVideoClick = { setSelectedVideo(it) })
                 }
             }
         } else {
-            TimasOyunSection(games)
+            TimasOyunSection(games, isTablet = false, onGameClick = { game ->
+                if (game.badgeText == "Yakında" || game.url.isEmpty()) {
+                    Toast.makeText(context, "${game.title} yakında sizlerle!", Toast.LENGTH_SHORT).show()
+                } else {
+                    setSelectedGame(game)
+                }
+            })
             Spacer(modifier = Modifier.height(24.dp))
-            TimasCocukTvSection(videos, onVideoClick = { setSelectedVideo(it) })
+            TimasCocukTvSection(videos, isTablet = false, onVideoClick = { setSelectedVideo(it) })
         }
     }
 
@@ -100,10 +150,17 @@ fun GamesAndTvSection() {
             onDismiss = { setSelectedVideo(null) }
         )
     }
+
+    if (selectedGame != null) {
+        GamePlayDialog(
+            game = selectedGame!!,
+            onDismiss = { setSelectedGame(null) }
+        )
+    }
 }
 
 @Composable
-fun TimasOyunSection(games: List<TimasGame>) {
+fun TimasOyunSection(games: List<TimasGame>, isTablet: Boolean, onGameClick: (TimasGame) -> Unit) {
     Column {
         SectionHeader(title = "Timaş Oyun", actionText = "Oyun Gezegeni")
         Spacer(modifier = Modifier.height(12.dp))
@@ -112,14 +169,14 @@ fun TimasOyunSection(games: List<TimasGame>) {
             contentPadding = PaddingValues(end = 16.dp)
         ) {
             items(games) { game ->
-                GameCard(game)
+                GameCard(game, isTablet = isTablet, onClick = { onGameClick(game) })
             }
         }
     }
 }
 
 @Composable
-fun TimasCocukTvSection(videos: List<TimasVideo>, onVideoClick: (TimasVideo) -> Unit) {
+fun TimasCocukTvSection(videos: List<TimasVideo>, isTablet: Boolean, onVideoClick: (TimasVideo) -> Unit) {
     Column {
         SectionHeader(title = "Timaş Çocuk TV", actionText = "Çizgi Film")
         Spacer(modifier = Modifier.height(12.dp))
@@ -128,7 +185,7 @@ fun TimasCocukTvSection(videos: List<TimasVideo>, onVideoClick: (TimasVideo) -> 
             contentPadding = PaddingValues(end = 16.dp)
         ) {
             items(videos) { video ->
-                VideoCard(video, onClick = { onVideoClick(video) })
+                VideoCard(video, isTablet = isTablet, onClick = { onVideoClick(video) })
             }
         }
     }
@@ -158,67 +215,105 @@ fun SectionHeader(title: String, actionText: String) {
 }
 
 @Composable
-fun GameCard(game: TimasGame) {
+fun GameCard(game: TimasGame, isTablet: Boolean, onClick: () -> Unit) {
+    val cardWidth = if (isTablet) 240.dp else 180.dp
+    val cardHeight = if (isTablet) 180.dp else 145.dp
+    val iconSize = if (isTablet) 56.dp else 46.dp
+    val titleFontSize = if (isTablet) 16.sp else 14.sp
+    val subtitleFontSize = if (isTablet) 11.sp else 10.sp
+    
     Card(
         modifier = Modifier
-            .width(160.dp)
-            .height(130.dp)
-            .shadow(4.dp, RoundedCornerShape(12.dp))
-            .clickable { },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+            .width(cardWidth)
+            .height(cardHeight)
+            .shadow(8.dp, RoundedCornerShape(20.dp))
+            .clickable { onClick() }
+            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
+                .background(Brush.verticalGradient(game.gradientColors))
+                .padding(if (isTablet) 18.dp else 14.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(game.iconBgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = game.icon,
-                    contentDescription = game.title,
-                    tint = game.iconTint,
-                    modifier = Modifier.size(20.dp)
-                )
+            if (game.badgeText != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .border(0.5.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = game.badgeText,
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = game.title,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B),
-                fontSize = 13.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = game.subtitle,
-                color = Color(0xFF64748B),
-                fontSize = 11.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(iconSize)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                        .padding(2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = game.iconResId,
+                        contentDescription = game.title,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(10.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = game.title,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = titleFontSize,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = game.subtitle,
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = subtitleFontSize,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 14.sp
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun VideoCard(video: TimasVideo, onClick: () -> Unit) {
+fun VideoCard(video: TimasVideo, isTablet: Boolean, onClick: () -> Unit) {
+    val cardWidth = if (isTablet) 280.dp else 220.dp
+    val cardHeight = if (isTablet) 175.dp else 135.dp
+    val titleFontSize = if (isTablet) 13.sp else 12.sp
+    
     Card(
         modifier = Modifier
-            .width(220.dp)
-            .height(130.dp)
-            .shadow(4.dp, RoundedCornerShape(12.dp))
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
+            .width(cardWidth)
+            .height(cardHeight)
+            .shadow(6.dp, RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -236,7 +331,7 @@ fun VideoCard(video: TimasVideo, onClick: () -> Unit) {
                 // Play Button Overlay
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.5f))
                         .align(Alignment.Center),
@@ -246,7 +341,7 @@ fun VideoCard(video: TimasVideo, onClick: () -> Unit) {
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Play",
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 // Duration Label
@@ -254,7 +349,7 @@ fun VideoCard(video: TimasVideo, onClick: () -> Unit) {
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(Color.Black.copy(alpha = 0.7f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
@@ -271,13 +366,13 @@ fun VideoCard(video: TimasVideo, onClick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 Text(
                     text = video.title,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1E293B),
-                    fontSize = 12.sp,
+                    fontSize = titleFontSize,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -311,11 +406,16 @@ fun VideoPlayerDialog(video: TimasVideo, onDismiss: () -> Unit) {
                             android.view.ViewGroup.LayoutParams.MATCH_PARENT
                         )
                         setBackgroundColor(android.graphics.Color.BLACK)
+                        
+                        // Set modern user agent to prevent YouTube bot/security blocks
+                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"
+                        
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
                         settings.mediaPlaybackRequiresUserGesture = false
                         settings.useWideViewPort = true
                         settings.loadWithOverviewMode = true
+                        
                         webChromeClient = WebChromeClient()
                         webViewClient = object : WebViewClient() {
                             override fun onReceivedError(
@@ -324,21 +424,19 @@ fun VideoPlayerDialog(video: TimasVideo, onDismiss: () -> Unit) {
                                 error: android.webkit.WebResourceError?
                             ) {
                                 super.onReceivedError(view, request, error)
-                                if (request?.url?.toString()?.contains("youtube") == true || request?.isForMainFrame == true) {
+                                if (request?.isForMainFrame == true) {
                                     val errorHtml = """
                                         <!DOCTYPE html>
                                         <html>
                                         <head>
                                             <meta name="viewport" content="width=device-width, initial-scale=1">
                                             <style>
-                                                body { background-color: #F8FAFC; color: #1E293B; font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; padding: 20px; box-sizing: border-box; }
-                                                h2 { margin-bottom: 8px; color: #0F172A; }
-                                                p { color: #64748B; margin-top: 0; font-size: 14px; }
-                                                svg { width: 64px; height: 64px; fill: #94A3B8; margin-bottom: 16px; }
+                                                body { background-color: #000000; color: #FFFFFF; font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; padding: 20px; box-sizing: border-box; }
+                                                h2 { margin-bottom: 8px; color: #FFFFFF; }
+                                                p { color: #888888; margin-top: 0; font-size: 14px; }
                                             </style>
                                         </head>
                                         <body>
-                                            <svg viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
                                             <h2>Bağlantı Hatası</h2>
                                             <p>Video yüklenirken bir sorun oluştu.<br/>Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</p>
                                         </body>
@@ -349,16 +447,31 @@ fun VideoPlayerDialog(video: TimasVideo, onDismiss: () -> Unit) {
                             }
                         }
                         
+                        // Embed using HTML iframe with baseUrl = https://timas.com.tr
+                        // This sets the document origin to timas.com.tr and makes WebView automatically 
+                        // send 'https://timas.com.tr' as the 'Referer' header for all subresource requests, 
+                        // which satisfies YouTube's strict security checks.
                         val html = """
                             <!DOCTYPE html>
                             <html>
-                            <body style="margin:0;padding:0;background-color:black;">
-                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&rel=0&modestbranding=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            <head>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <style>
+                                    body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000000; overflow: hidden; }
+                                    iframe { width: 100%; height: 100%; border: none; }
+                                </style>
+                            </head>
+                            <body>
+                                <iframe 
+                                    src="https://www.youtube-nocookie.com/embed/${video.youtubeId}?autoplay=1&origin=https://timas.com.tr&rel=0&modestbranding=1" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen>
+                                </iframe>
                             </body>
                             </html>
                         """.trimIndent()
                         
-                        loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "utf-8", null)
+                        loadDataWithBaseURL("https://timas.com.tr", html, "text/html", "utf-8", null)
                     }
                 },
                 modifier = Modifier.fillMaxSize()
@@ -379,6 +492,70 @@ fun VideoPlayerDialog(video: TimasVideo, onDismiss: () -> Unit) {
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun GamePlayDialog(game: TimasGame, onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Black
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AndroidView(
+                    factory = { context ->
+                        WebView(context).apply {
+                            layoutParams = android.view.ViewGroup.LayoutParams(
+                                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            setBackgroundColor(android.graphics.Color.WHITE)
+                            
+                            // Modern mobile browser settings
+                            settings.userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.useWideViewPort = true
+                            settings.loadWithOverviewMode = true
+                            settings.allowFileAccess = true
+                            settings.allowContentAccess = true
+                            
+                            webChromeClient = WebChromeClient()
+                            webViewClient = WebViewClient()
+                            
+                            loadUrl(game.url)
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Immersive floating back/close button
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                        .border(1.5.dp, Color.White.copy(alpha = 0.8f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Oyunu Kapat",
+                        tint = Color.White,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
     }

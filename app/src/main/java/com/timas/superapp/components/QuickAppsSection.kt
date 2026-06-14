@@ -104,7 +104,7 @@ fun QuickAppsSection(
         QuickApp("Timaş Portal", R.drawable.resim3, ActionType.WEB_VIEW, "https://portal.timas.com.tr"),
         QuickApp("Bayilik B2B", R.drawable.resim4, ActionType.WEB_VIEW, "https://timasdagitim.com/"),
         QuickApp("Kütüphanem", R.drawable.resim5, ActionType.NATIVE),
-        QuickApp("Timaş Çocuk", R.drawable.resim7, ActionType.GOOGLE_PLAY, "https://play.google.com/store/apps/details?id=com.timas.cocuk"),
+        QuickApp("Timaş Çocuk", R.drawable.resim12, ActionType.GOOGLE_PLAY, "https://play.google.com/store/apps/details?id=com.ageofkids.timascocuk.app&pcampaignid=web_share"),
         QuickApp("ZEKii", R.drawable.resim11, ActionType.NATIVE),
         QuickApp("Okuma Kulübü", R.drawable.resim10, ActionType.NATIVE),
         QuickApp("E-Book", R.drawable.resim9, ActionType.CUSTOM_PAGE),
@@ -159,8 +159,33 @@ fun QuickAppsSection(
                     } else if (isOkumaKulubu) {
                         onNavigateToOkumaKulubu()
                     } else if (app.actionType == ActionType.GOOGLE_PLAY && app.actionData.isNotEmpty()) {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(app.actionData))
-                        context.startActivity(intent)
+                        try {
+                            val uri = android.net.Uri.parse(app.actionData)
+                            val packageName = uri.getQueryParameter("id") ?: "com.timas.cocuk"
+                            val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
+                            if (launchIntent != null) {
+                                context.startActivity(launchIntent)
+                            } else {
+                                try {
+                                    val marketIntent = android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse("market://details?id=$packageName")
+                                    ).apply {
+                                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(marketIntent)
+                                } catch (anfe: android.content.ActivityNotFoundException) {
+                                    val webIntent = android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse(app.actionData)
+                                    )
+                                    context.startActivity(webIntent)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(app.actionData))
+                            context.startActivity(intent)
+                        }
                     } else {
                         Toast.makeText(context, "${app.title} (Action: ${app.actionType})", Toast.LENGTH_SHORT).show()
                     }

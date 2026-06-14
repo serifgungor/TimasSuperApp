@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
+import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.delay
 
 // ─── Renk Paleti (E-Book ve Sesli Kitap ile Uyumlu) ───────────────────
@@ -260,6 +261,7 @@ fun OkumaKulubuScreen(
     var selectedMemberProfile by remember { mutableStateOf<ClubMember?>(null) } // Member detail popup state
     var showBookDetailDialog by remember { mutableStateOf(false) } // Book details dialog state
     var selectedEventDetail by remember { mutableStateOf<ClubEvent?>(null) } // Event details popup state
+    var eventToConfirmRSVP by remember { mutableStateOf<ClubEvent?>(null) } // RSVP confirmation state
     var isJoinedMonthSelection by remember { mutableStateOf(false) } // Join common reading state
 
     // Countdown Timer to Next Meeting (Simulated)
@@ -461,42 +463,29 @@ fun OkumaKulubuScreen(
     // --- Aylık Oturum ve Etkinlikler (Event Detail & RSVP Dialog) ---
     selectedEventDetail?.let { event ->
         val originalIndex = events.indexOfFirst { it.id == event.id }
-        AlertDialog(
+        Dialog(
             onDismissRequest = { selectedEventDetail = null },
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Orange.copy(alpha = 0.1f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(event.dateDay, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Orange)
-                            Text(event.dateMonth.uppercase(), fontSize = 8.sp, fontWeight = FontWeight.Bold, color = Orange)
-                        }
-                    }
-                    Column {
-                        Text(event.title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextMain)
-                        Text(event.dateFull, fontSize = 9.sp, color = TextMuted)
-                    }
-                }
-            },
-            text = {
+            properties = androidx.compose.ui.window.DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = true
+            )
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = CardBg,
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .fillMaxHeight(0.85f)
+                    .clip(RoundedCornerShape(24.dp))
+            ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 ) {
-                    // Event Cover Image inside Popup
+                    // 1. Event Image Banner with Close button
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(130.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .height(180.dp)
                     ) {
                         SubcomposeAsyncImage(
                             model = event.coverUrl,
@@ -504,94 +493,188 @@ fun OkumaKulubuScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
-                    }
-
-                    Text(
-                        text = event.description,
-                        fontSize = 11.sp,
-                        color = TextMain,
-                        lineHeight = 16.sp
-                    )
-                    
-                    HorizontalDivider(color = BorderClr)
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (event.platform.contains("Zoom")) Icons.Default.Videocam else Icons.Default.LiveTv,
-                            contentDescription = null,
-                            tint = if (event.platform.contains("Zoom")) Color(0xFF27AE60) else Orange,
-                            modifier = Modifier.size(16.dp)
+                        // Gradient Overlay
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+                                        startY = 100f
+                                    )
+                                )
                         )
-                        Column {
-                            Text("Platform ve Katılım Detayı:", fontSize = 10.sp, color = TextMuted)
+                        // Close icon
+                        IconButton(
+                            onClick = { selectedEventDetail = null },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(12.dp)
+                                .size(36.dp)
+                                .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Kapat", tint = Color.White, modifier = Modifier.size(18.dp))
+                        }
+                        
+                        // Date badge overlaid on image
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Orange)
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(event.dateDay, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                                Text(event.dateMonth.uppercase(), fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+                            }
+                        }
+                    }
+                    
+                    // 2. Info Content
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
-                                text = if (event.platform.contains("Zoom")) "${event.platform} (zoom.us/j/timas-koza)" else event.platform,
-                                fontSize = 11.sp,
+                                text = event.title,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (event.platform.contains("Zoom")) Color(0xFF27AE60) else Orange
+                                color = TextMain,
+                                fontFamily = FontFamily.Serif
+                            )
+                            Text(
+                                text = event.dateFull,
+                                fontSize = 12.sp,
+                                color = TextMuted,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                        
+                        HorizontalDivider(color = BorderClr)
+                        
+                        // Platform / Location Detail
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Orange.copy(alpha = 0.08f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (event.platform.contains("Zoom")) Icons.Default.Videocam else Icons.Default.LiveTv,
+                                    contentDescription = null,
+                                    tint = if (event.platform.contains("Zoom")) Color(0xFF27AE60) else Orange,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Column {
+                                Text("Oturum Detayı", fontSize = 11.sp, color = TextMuted)
+                                Text(
+                                    text = if (event.platform.contains("Zoom")) "${event.platform} (zoom.us/j/timas-koza)" else event.platform,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (event.platform.contains("Zoom")) Color(0xFF27AE60) else Orange
+                                )
+                            }
+                        }
+                        
+                        HorizontalDivider(color = BorderClr)
+                        
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Açıklama", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextMain)
+                            Text(
+                                text = event.description,
+                                fontSize = 12.sp,
+                                color = TextMain.copy(alpha = 0.8f),
+                                lineHeight = 18.sp
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // RSVP Actions
+                        Button(
+                            onClick = {
+                                if (event.isRSVPed) {
+                                    // Direct leave if already joined
+                                    if (originalIndex != -1) {
+                                        events[originalIndex] = event.copy(isRSVPed = false)
+                                        selectedEventDetail = events[originalIndex]
+                                    }
+                                } else {
+                                    // Trigger confirmation dialog
+                                    selectedEventDetail = null
+                                    eventToConfirmRSVP = event
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (event.isRSVPed) Color(0xFFE2E8F0) else Orange,
+                                contentColor = if (event.isRSVPed) TextMain else Color.White
+                            )
+                        ) {
+                            Text(
+                                text = if (event.isRSVPed) "Katıldın (İptal Et)" else "Katıl",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
                             )
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if (eventToConfirmRSVP != null) {
+        val event = eventToConfirmRSVP!!
+        AlertDialog(
+            onDismissRequest = { eventToConfirmRSVP = null },
+            title = {
+                Text(
+                    text = "Katılım Onayı",
+                    fontWeight = FontWeight.Bold,
+                    color = DarkSlate
+                )
+            },
+            text = {
+                Text(
+                    text = "${event.title} oturumuna katılmak istediğinizden emin misiniz?",
+                    color = TextMuted
+                )
             },
             confirmButton = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Button(
+                    onClick = {
+                        val idx = events.indexOfFirst { it.id == event.id }
+                        if (idx != -1) {
+                            events[idx] = event.copy(isRSVPed = true)
+                        }
+                        eventToConfirmRSVP = null
+                        Toast.makeText(context, "Katılımınız onaylandı!", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Orange)
                 ) {
-                    Button(
-                        onClick = {
-                            if (originalIndex != -1) {
-                                val updatedRSVP = !event.isRSVPed
-                                events[originalIndex] = event.copy(isRSVPed = updatedRSVP)
-                                selectedEventDetail = events[originalIndex] // update dialog state
-                                if (updatedRSVP) {
-                                    Toast.makeText(context, "${event.title} oturumuna katılımınız onaylandı!", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (event.isRSVPed) Color(0xFF27AE60) else Orange
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (event.isRSVPed) Icons.Default.CheckCircle else Icons.Default.Add,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = if (event.isRSVPed) "Oturuma Katılıyorsunuz" else "Oturuma Katılacağım",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text("Evet, Katıl", color = Color.White)
                 }
-                
-                TextButton(
-                    onClick = { selectedEventDetail = null },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Kapat", color = TextMuted, fontWeight = FontWeight.Bold)
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToConfirmRSVP = null }) {
+                    Text("Vazgeç", color = TextMuted)
                 }
-            }
-        },
-        shape = RoundedCornerShape(24.dp),
-        containerColor = CardBg
-    )
-}
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.White
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -899,12 +982,12 @@ fun OkumaKulubuScreen(
                 ) {
                     items(events) { event ->
                         Card(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(containerColor = CardBg),
                             border = androidx.compose.foundation.BorderStroke(1.dp, BorderClr),
                             modifier = Modifier
                                 .width(185.dp) // Fixed width for horizontal scrolling
-                                .shadow(2.dp, RoundedCornerShape(16.dp))
+                                .shadow(2.dp, RoundedCornerShape(20.dp))
                                 .clickable { selectedEventDetail = event } // Opens event detail dialog with RSVP
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
@@ -913,7 +996,7 @@ fun OkumaKulubuScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(115.dp)
-                                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                        .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                                 ) {
                                     SubcomposeAsyncImage(
                                         model = event.coverUrl,
@@ -945,16 +1028,27 @@ fun OkumaKulubuScreen(
                                             modifier = Modifier
                                                 .align(Alignment.TopEnd)
                                                 .padding(8.dp)
-                                                .clip(CircleShape)
+                                                .clip(RoundedCornerShape(8.dp))
                                                 .background(Color(0xFF27AE60))
-                                                .padding(4.dp)
+                                                .padding(horizontal = 6.dp, vertical = 3.dp)
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = "Katılıyorsunuz",
-                                                tint = Color.White,
-                                                modifier = Modifier.size(10.dp)
-                                            )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(8.dp)
+                                                )
+                                                Text(
+                                                    text = "Katılıyorsunuz",
+                                                    fontSize = 8.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
                                         }
                                     }
                                 }

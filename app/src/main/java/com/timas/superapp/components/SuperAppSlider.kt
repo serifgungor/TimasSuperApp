@@ -2,6 +2,7 @@ package com.timas.superapp.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,13 +48,36 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SuperAppSlider() {
-    // Örnek slider öğeleri (Renkler ve başlıklar)
+    var activeUrl by remember { mutableStateOf<String?>(null) }
+    var activeTitle by remember { mutableStateOf<String?>(null) }
+
+    // Slider items: (Title, ImageUrl, TargetUrl)
     val sliderItems = listOf(
-        Pair("Timaş Çocuk", "https://cdn.timas.com.tr/other/timascocukapp-banner-nisan2026.jpg"),
-        Pair("Mayıs Kitapları", "https://cdn.timas.com.tr/other/mayiskitaplari-banner-mayis2026.jpg"),
-        Pair("Kampanyalar", "https://cdn.timas.com.tr/other/kampanyalar.jpg"),
-        Pair("Timaş Europe", "https://cdn.timas.com.tr/other/timas-europe-banner-aralik2024.jpg"),
-        Pair("Okula Dönüş", "https://cdn.timas.com.tr/other/okul-banner.jpg")
+        Triple(
+            "Timaş Çocuk",
+            "https://cdn.timas.com.tr/other/timascocukapp-banner-nisan2026.jpg",
+            "https://app.timascocuk.com/?utm_source=timascom&utm_medium=anasayfa-banner&utm_campaign=timascocukapp&utm_term=tanitim&utm_content=banner&dev=macos&ref=aHR0cHM6Ly90aW1hcy5jb20udHIv"
+        ),
+        Triple(
+            "Mayıs Kitapları",
+            "https://cdn.timas.com.tr/other/mayiskitaplari-banner-mayis2026.jpg",
+            "https://satinal.timas.com.tr/kampanyalar?utm_source=timascom+anasayfa&utm_medium=online+kampanyalar&utm_campaign=timascomwebsite+yonlendirme"
+        ),
+        Triple(
+            "Kampanyalar",
+            "https://cdn.timas.com.tr/other/kampanyalar.jpg",
+            "https://satinal.timas.com.tr/kampanyalar?utm_source=timascom+anasayfa&utm_medium=online+kampanyalar&utm_campaign=timascomwebsite+yonlendirme"
+        ),
+        Triple(
+            "Timaş Europe",
+            "https://cdn.timas.com.tr/other/timas-europe-banner-aralik2024.jpg",
+            "https://www.timaseurope.com/?utm_source=turkiye+web+site&utm_medium=web+banner&utm_campaign=turkiye+timas+banner&utm_id=turkiye+timas+sitesi"
+        ),
+        Triple(
+            "Okula Dönüş",
+            "https://cdn.timas.com.tr/other/okul-banner.jpg",
+            "https://timasokul.com/?utm_source=timascom+banner&utm_medium=anasayfa+banner&utm_campaign=timascom+banner"
+        )
     )
 
     val actualItemCount = sliderItems.size
@@ -111,7 +133,13 @@ fun SuperAppSlider() {
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color.LightGray),
+                        .background(Color.LightGray)
+                        .clickable {
+                            if (item.third.isNotEmpty()) {
+                                activeUrl = item.third
+                                activeTitle = item.first
+                            }
+                        },
                     contentAlignment = Alignment.BottomStart
                 ) {
                     AsyncImage(
@@ -202,6 +230,17 @@ fun SuperAppSlider() {
                 )
             }
         }
+    }
+
+    if (activeUrl != null) {
+        FullScreenWebViewDialog(
+            title = activeTitle.orEmpty(),
+            url = activeUrl!!,
+            onDismiss = {
+                activeUrl = null
+                activeTitle = null
+            }
+        )
     }
 }
 

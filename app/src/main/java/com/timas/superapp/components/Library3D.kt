@@ -632,7 +632,7 @@ fun Library3DScreen() {
                         .fillMaxHeight(0.85f)
                         .clip(RoundedCornerShape(24.dp)),
                     shape = RoundedCornerShape(24.dp),
-                    color = Color(0xFF120C0A)
+                    color = Color.White
                 ) {
                     com.timas.superapp.screens.BookDetailScreen(
                         book = selectedBook!!,
@@ -644,7 +644,8 @@ fun Library3DScreen() {
                         onStartListening = { book ->
                             selectedBook = null
                             activeAudioPlayer = book
-                        }
+                        },
+                        isLightMode = true
                     )
                 }
             }
