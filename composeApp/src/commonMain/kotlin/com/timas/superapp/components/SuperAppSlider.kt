@@ -3,18 +3,7 @@ package com.timas.superapp.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -96,35 +85,26 @@ fun SuperAppSlider() {
         pagerState.animateScrollToPage(pagerState.currentPage + 1)
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val screenWidth = maxWidth
-        val isPortrait = maxHeight > maxWidth
-        
-        // Ekran genişliğine ve yönüne göre duyarlı hesaplamalar
-        val horizontalPadding = if (isPortrait) 16.dp else screenWidth * 0.15f
-        val cardWidth = screenWidth - (horizontalPadding * 2)
-        val cardHeight = if (isPortrait) {
-            cardWidth / 1.6f
-        } else {
-            (cardWidth / 1.4f).coerceAtMost(360.dp)
-        }
-        // Okların hizalanması: Dikeyde kartın hemen içinde, yatayda ise dış boşlukta
-        val arrowPadding = if (isPortrait) 24.dp else max(4.dp, (horizontalPadding - 36.dp) / 2)
-
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+            ) {
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(cardHeight),
+                    modifier = Modifier.fillMaxSize(),
                     pageSpacing = 16.dp,
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = horizontalPadding)
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
                 ) { page ->
                     val actualPage = page % actualItemCount
                     val item = sliderItems[actualPage]
@@ -145,7 +125,7 @@ fun SuperAppSlider() {
                         AsyncImage(
                             model = item.second,
                             contentDescription = item.first,
-                            contentScale = ContentScale.FillBounds,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                         
@@ -172,7 +152,7 @@ fun SuperAppSlider() {
                     },
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = arrowPadding)
+                        .padding(start = 24.dp)
                         .size(36.dp)
                         .background(Color.White.copy(alpha = 0.9f), CircleShape)
                 ) {
@@ -192,7 +172,7 @@ fun SuperAppSlider() {
                     },
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .padding(end = arrowPadding)
+                        .padding(end = 24.dp)
                         .size(36.dp)
                         .background(Color.White.copy(alpha = 0.9f), CircleShape)
                 ) {

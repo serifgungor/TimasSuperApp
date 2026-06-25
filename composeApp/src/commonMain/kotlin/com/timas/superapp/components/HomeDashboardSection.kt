@@ -46,7 +46,11 @@ data class DashboardEvent(
 )
 
 @Composable
-fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
+fun HomeDashboardSection(
+    onKatilClick: (String) -> Unit = {},
+    onNavigateToEBook: () -> Unit = {},
+    onNavigateToSesliKitap: () -> Unit = {}
+) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val isTablet = maxWidth >= 600.dp
         val bookCardHeight = if (isTablet) 325.dp else 255.dp
@@ -148,7 +152,14 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Box(modifier = Modifier.weight(1.4f)) { YeniGelenler(books, isTablet) }
+                Box(modifier = Modifier.weight(1.4f)) { 
+                    YeniGelenler(
+                        books, 
+                        isTablet,
+                        onNavigateToEBook = onNavigateToEBook,
+                        onNavigateToSesliKitap = onNavigateToSesliKitap
+                    ) 
+                }
                 Box(modifier = Modifier.weight(1f)) { 
                     EtkinlikTakvimi(
                         events = events, 
@@ -161,7 +172,14 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
             }
         } else {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Box(modifier = Modifier.padding(horizontal = 16.dp)) { YeniGelenler(books, isTablet) }
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) { 
+                    YeniGelenler(
+                        books, 
+                        isTablet,
+                        onNavigateToEBook = onNavigateToEBook,
+                        onNavigateToSesliKitap = onNavigateToSesliKitap
+                    ) 
+                }
                 Spacer(modifier = Modifier.height(24.dp))
                 Box(modifier = Modifier.padding(horizontal = 16.dp)) { 
                     EtkinlikTakvimi(
@@ -178,7 +196,12 @@ fun HomeDashboardSection(onKatilClick: (String) -> Unit = {}) {
 }
 
 @Composable
-fun YeniGelenler(books: List<DashboardBook>, isTablet: Boolean) {
+fun YeniGelenler(
+    books: List<DashboardBook>, 
+    isTablet: Boolean,
+    onNavigateToEBook: () -> Unit = {},
+    onNavigateToSesliKitap: () -> Unit = {}
+) {
     var selectedBook by remember { mutableStateOf<DashboardBook?>(null) }
 
     Column {
@@ -199,7 +222,13 @@ fun YeniGelenler(books: List<DashboardBook>, isTablet: Boolean) {
     }
 
     selectedBook?.let { book ->
-        BookDetailDialog(book = book, isTablet = isTablet, onDismiss = { selectedBook = null })
+        BookDetailDialog(
+            book = book, 
+            isTablet = isTablet, 
+            onDismiss = { selectedBook = null },
+            onNavigateToEBook = onNavigateToEBook,
+            onNavigateToSesliKitap = onNavigateToSesliKitap
+        )
     }
 }
 
@@ -466,7 +495,13 @@ fun EventRowCard(
 fun borderStroke(color: Color) = androidx.compose.foundation.BorderStroke(1.dp, color)
 
 @Composable
-fun BookDetailDialog(book: DashboardBook, isTablet: Boolean, onDismiss: () -> Unit) {
+fun BookDetailDialog(
+    book: DashboardBook, 
+    isTablet: Boolean, 
+    onDismiss: () -> Unit,
+    onNavigateToEBook: () -> Unit = {},
+    onNavigateToSesliKitap: () -> Unit = {}
+) {
     val dialogWidth = if (isTablet) 0.5f else 0.95f
     
     Dialog(
@@ -492,8 +527,14 @@ fun BookDetailDialog(book: DashboardBook, isTablet: Boolean, onDismiss: () -> Un
                     isOwned = true
                 ),
                 onBack = onDismiss,
-                onStartReading = { onDismiss() },
-                onStartListening = { onDismiss() },
+                onStartReading = { 
+                    onDismiss() 
+                    onNavigateToEBook()
+                },
+                onStartListening = { 
+                    onDismiss() 
+                    onNavigateToSesliKitap()
+                },
                 isLightMode = true
             )
         }

@@ -123,11 +123,7 @@ fun QuickAppsSection(
                     val isOkumaKulubu = titleLower.contains("okuma")
                     
                     if (app.actionType == ActionType.WEB_VIEW) {
-                        try {
-                            openUrl(app.actionData)
-                        } catch (e: Exception) {
-                            selectedApp = app
-                        }
+                        selectedApp = app
                     } else if (app.title == "Kütüphanem") {
                         showLibrary = true
                     } else if (isZekii) {

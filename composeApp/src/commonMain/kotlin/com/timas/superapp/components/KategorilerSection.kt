@@ -18,29 +18,39 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
+import androidx.compose.foundation.Image
+import org.jetbrains.compose.resources.painterResource
+import timas.composeapp.generated.resources.Res
+import timas.composeapp.generated.resources.*
 
-data class KategoriItem(val name: String, val icon: String, val url: String)
+data class KategoriItem(
+    val name: String,
+    val icon: org.jetbrains.compose.resources.DrawableResource,
+    val url: String
+)
 
 @Composable
 fun KategorilerSection() {
+    var activeUrl by remember { mutableStateOf<String?>(null) }
+    var activeTitle by remember { mutableStateOf<String?>(null) }
+
     val kategoriler = listOf(
-        KategoriItem("Timaş Yayınları", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/timasyayinlari-tr-1.svg", "https://timas.com.tr/timas-yayinlari"),
-        KategoriItem("Timaş Tarih", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/tarih-tr-2.jpg", "https://timas.com.tr/timas-tarih"),
-        KategoriItem("Timaş Akademi", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/akademi-tr-4.jpg", "https://timas.com.tr/akademi"),
-        KategoriItem("Sufi Kitap", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/sufi-tr-5.jpg", "https://timas.com.tr/sufi"),
-        KategoriItem("Portakal Kitap", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/portakal-tr-16.jpg", "https://timas.com.tr/portakal"),
-        KategoriItem("Genç Timaş", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/genc-tr-6.jpg", "https://timas.com.tr/genc-timas"),
-        KategoriItem("İlk Genç Timaş", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/ilkgenc-tr-7.jpg", "https://timas.com.tr/ilk-genclik"),
-        KategoriItem("Carpe Diem Kitap", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/carpe-tr-14.jpg", "https://timas.com.tr/carpe-diem"),
-        KategoriItem("Timaş Çocuk", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/timascocuk-tr-8.jpg", "https://timas.com.tr/timas-cocuk"),
-        KategoriItem("Mavi Kirpi Kitap", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/mavikirpi-tr-11.jpg", "https://timas.com.tr/mavi-kirpi"),
-        KategoriItem("Eğlenceli Bilgi", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/eglenceli-tr-9.jpg", "https://timas.com.tr/eglenceli-bilgi"),
-        KategoriItem("Sincap Kitap", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/sincap-tr-13.jpg", "https://timas.com.tr/sincap"),
-        KategoriItem("Timaş İnanç", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/inanc-tr-3.jpg", "https://timas.com.tr/timas-inanc"),
-        KategoriItem("Gülce Kitap", "https://satinal.timas.com.tr/Data/BlockUploadData/slider/img1/759/gulce-tr-10.jpg", "https://timas.com.tr/gulce-kitap"),
-        KategoriItem("Dikkat ve Zeka Akademisi", "https://cdn.timas.com.tr/dikkat-zeka-akademisi.svg", "https://timas.com.tr/dikkat-ve-zeka-akademisi"),
-        KategoriItem("Antik Kitap", "https://cdn.timas.com.tr/antik.svg", "https://timas.com.tr/antik-kitap")
+        KategoriItem("Timaş Yayınları", Res.drawable.cat_timas_yayinlari, "https://timas.com.tr/timas-yayinlari"),
+        KategoriItem("Timaş Tarih", Res.drawable.cat_tarih, "https://timas.com.tr/timas-tarih"),
+        KategoriItem("Timaş Akademi", Res.drawable.cat_akademi, "https://timas.com.tr/akademi"),
+        KategoriItem("Sufi Kitap", Res.drawable.cat_sufi, "https://timas.com.tr/sufi"),
+        KategoriItem("Portakal Kitap", Res.drawable.cat_portakal, "https://timas.com.tr/portakal"),
+        KategoriItem("Genç Timaş", Res.drawable.cat_genc, "https://timas.com.tr/genc-timas"),
+        KategoriItem("İlk Genç Timaş", Res.drawable.cat_ilkgenc, "https://timas.com.tr/ilk-genclik"),
+        KategoriItem("Carpe Diem Kitap", Res.drawable.cat_carpe_diem, "https://timas.com.tr/carpe-diem"),
+        KategoriItem("Timaş Çocuk", Res.drawable.cat_timas_cocuk, "https://timas.com.tr/timas-cocuk"),
+        KategoriItem("Mavi Kirpi Kitap", Res.drawable.cat_mavi_kirpi, "https://timas.com.tr/mavi-kirpi"),
+        KategoriItem("Eğlenceli Bilgi", Res.drawable.cat_eglenceli_bilgi, "https://timas.com.tr/eglenceli-bilgi"),
+        KategoriItem("Sincap Kitap", Res.drawable.cat_sincap, "https://timas.com.tr/sincap"),
+        KategoriItem("Timaş İnanç", Res.drawable.cat_inanc, "https://timas.com.tr/timas-inanc"),
+        KategoriItem("Gülce Kitap", Res.drawable.cat_gulce, "https://timas.com.tr/gulce-kitap"),
+        KategoriItem("Dikkat ve Zeka Akademisi", Res.drawable.cat_dikkat_zeka, "https://timas.com.tr/dikkat-ve-zeka-akademisi"),
+        KategoriItem("Antik Kitap", Res.drawable.cat_antik, "https://timas.com.tr/antik-kitap")
     )
 
     Column(
@@ -68,13 +78,16 @@ fun KategorilerSection() {
                         .background(Color.White, CircleShape)
                         .clip(CircleShape)
                         .clickable {
-                            openUrl(kategori.url)
+                            if (kategori.url.isNotEmpty()) {
+                                activeUrl = kategori.url
+                                activeTitle = kategori.name
+                            }
                         }
                         .padding(10.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = kategori.icon,
+                    Image(
+                        painter = painterResource(kategori.icon),
                         contentDescription = kategori.name,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxSize()
@@ -83,4 +96,16 @@ fun KategorilerSection() {
             }
         }
     }
+
+    if (activeUrl != null) {
+        FullScreenWebViewDialog(
+            title = activeTitle.orEmpty(),
+            url = activeUrl!!,
+            onDismiss = {
+                activeUrl = null
+                activeTitle = null
+            }
+        )
+    }
 }
+

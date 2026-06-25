@@ -7,6 +7,7 @@ import org.jetbrains.compose.resources.painterResource
 import com.timas.superapp.openUrl
 import com.timas.superapp.showToast
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
@@ -18,7 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +51,9 @@ data class TimasVideo(
 
 @Composable
 fun GamesAndTvSection() {
+    var activeUrl by remember { mutableStateOf<String?>(null) }
+    var activeTitle by remember { mutableStateOf<String?>(null) }
+
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val isTablet = maxWidth >= 600.dp
 
@@ -111,13 +115,15 @@ fun GamesAndTvSection() {
                             if (game.badgeText == "Yakında" || game.url.isEmpty()) {
                                 showToast("${game.title} yakında sizlerle!")
                             } else {
-                                openUrl(game.url)
+                                activeUrl = game.url
+                                activeTitle = game.title
                             }
                         })
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         TimasCocukTvSection(videos, isTablet = true, onVideoClick = { video ->
-                            openUrl("https://www.youtube.com/watch?v=${video.youtubeId}")
+                            activeUrl = "https://www.youtube.com/embed/${video.youtubeId}"
+                            activeTitle = video.title
                         })
                     }
                 }
@@ -126,15 +132,28 @@ fun GamesAndTvSection() {
                     if (game.badgeText == "Yakında" || game.url.isEmpty()) {
                         showToast("${game.title} yakında sizlerle!")
                     } else {
-                        openUrl(game.url)
+                        activeUrl = game.url
+                        activeTitle = game.title
                     }
                 })
                 Spacer(modifier = Modifier.height(24.dp))
                 TimasCocukTvSection(videos, isTablet = false, onVideoClick = { video ->
-                    openUrl("https://www.youtube.com/watch?v=${video.youtubeId}")
+                    activeUrl = "https://www.youtube.com/embed/${video.youtubeId}"
+                    activeTitle = video.title
                 })
             }
         }
+    }
+
+    if (activeUrl != null) {
+        FullScreenWebViewDialog(
+            title = activeTitle.orEmpty(),
+            url = activeUrl!!,
+            onDismiss = {
+                activeUrl = null
+                activeTitle = null
+            }
+        )
     }
 }
 
@@ -246,8 +265,8 @@ fun GameCard(game: TimasGame, isTablet: Boolean, onClick: () -> Unit) {
                         .padding(2.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = game.iconResId,
+                    Image(
+                        painter = painterResource(game.iconResId),
                         contentDescription = game.title,
                         modifier = Modifier
                             .fillMaxSize()

@@ -205,7 +205,9 @@ fun App() {
                                                 coroutineScope.launch {
                                                     snackbarHostState.showSnackbar("$eventTitle etkinliğine katılım talebiniz alındı.")
                                                 }
-                                            }
+                                            },
+                                            onNavigateToEBook = { currentScreen = AppScreen.E_BOOK },
+                                            onNavigateToSesliKitap = { currentScreen = AppScreen.SESLI_KITAP }
                                         )
                                         Spacer(modifier = Modifier.height(16.dp))
                                         QuickAppsSection(
